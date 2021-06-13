@@ -37,7 +37,7 @@ export const appData = {
 }
 
 
-// Get any ID from the <option> tag
+// Return the value from the given ID
 const getOptionsValue = (elementID) => {
     return document.getElementById(elementID).value
 }
@@ -53,6 +53,7 @@ const wageHandler = () => {
     D.fed_allowance = parseInt(getOptionsValue('fed-allowance'))
     D.state_allowance = parseInt(getOptionsValue('state-allowance'))
 
+    // Taxes table: Change state name for withholding
     document.querySelector("#state-withhold-select").textContent = D.state
 
 }

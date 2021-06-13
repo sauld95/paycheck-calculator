@@ -267,7 +267,7 @@ class Calc {
     }
 }
 
-// Create initial row for Earning Table
+// On load, create initial row for Earning Table
 document.addEventListener("DOMContentLoaded", () => {
     const mainRate = document.querySelector("#main-earning")
     
@@ -278,31 +278,27 @@ document.addEventListener("DOMContentLoaded", () => {
     UI.createEarningList(earning)
 })
 
-// Remove "is-invalid" class after value is typed
-document.querySelector("#earning-frm").addEventListener("input", () => {
-    validity.Validation("main-earning", "remove", /^[0-9]+\.?[0-9]?[0-9]?/g)
-    validity.Validation("week-hours", "remove", /^[0-9]+\.?[0-9]?[0-9]?/g)
-})
-
-// Submit new values to the table
+// Submit new values to the Earning table
 document.querySelector("#earning-frm").addEventListener("submit", e => {
     e.preventDefault()
     
-    // Check if a state is selected
+    // Add "is-invalid" class if value is if a state is not selected
     validity.Validation("state", "add", "")
     // Add "is-invalid" class if value is empty or no integer is typed
     validity.Validation("main-earning", "add", "", /[^0-9.]+/gi)
     validity.Validation("week-hours", "add", "", /[^0-9.]+/gi)
 
+    // If class contains 'is-invalid', return 
     let mainEarning = document.querySelector("#main-earning")
     const weekHours = document.querySelector("#Week-hours")
-    
-    if (!mainEarning.value || !parseFloat(mainEarning.value) || !weekHours.value || !parseFloat(weekHours.value)) {return}
-    if (taxCalc.appData.taxInfo.state === '') {return}
+    const stateInput = document.querySelector("#state")
+    if (mainEarning.classList.contains("is-invalid") || weekHours.classList.contains("is-invalid") || stateInput.classList.contains("is-invalid")) {return}
+
     const wageForm = document.querySelector("#earning-frm")
     const inputs = Array.from(wageForm.querySelectorAll('input[type="text"]'))
 
     inputs.forEach(input => {
+        // Set values to zero if value is empty or value is not numerical
         (!input.value || /[^0-9.]+/gi.test(input.value)) && (input.value = 0)
     })
 
@@ -318,12 +314,11 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
         hour2 = new Hours(weekendHours.name)
         hour2.setHours(parseFloat(weekendHours.value))
     } catch (err) {
-        console.error(err)
-        console.error("error: #weekend-hours does not exist")
+        // continue running the code after the error
     }
 
 
-    // Set new values for the Earnings Table
+    // Update values for the Earnings Table
     const rateGroup = Array.from(document.querySelectorAll(".rate-group"))
 
     rateGroup.forEach(pay => {
@@ -343,7 +338,7 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
     })
     
 
-    // Check overtime
+    // Check overtime and set or delete overtime
     if (hour1.hours > 40) {
         let preAmount = Calc.totalAmount()
 
@@ -361,10 +356,13 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
         UI.deleteEarning('overtime')
     }
 
-    // Get final total amount
+    // Get final total amount for the earning table
     let finalAmount = Calc.totalAmount()
 
+    // Amount set in tax-calc.js
     taxCalc.appData.table.earning_total = finalAmount
+
+    // Set final total amount for the earning table
     document.querySelector("#earning-tbl-total").nextElementSibling.textContent = `$ ${finalAmount.toFixed(2)}`
 
     // Tax Table
@@ -393,10 +391,17 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
 
 })
 
-// Create a New Rate 
+// Remove "is-invalid" class after correct value is typed
+document.querySelector("#earning-frm").addEventListener("input", () => {
+    validity.Validation("main-earning", "remove", /^[0-9]+\.?[0-9]?[0-9]?/g)
+    validity.Validation("week-hours", "remove", /^[0-9]+\.?[0-9]?[0-9]?/g)
+})
+
+// Begin creating a new rate 
 document.querySelector("#add-pay").addEventListener("click", () => {
     CreateInput.createOptionsRate()
 
+    // disable buttons to prevent submitting until the rate is created
     document.querySelector("#add-pay").disabled = true
     document.querySelector("#calculate").disabled = true
 
@@ -407,7 +412,7 @@ let weekendHours = null
 document.querySelector("#rate-input").addEventListener("change", () => {
     const option = document.querySelector("#rate-input").firstElementChild
 
-    // Initializa CreateInput class
+    // Initialize CreateInput class
     switch (option.value) {
         case "select":
             return
@@ -417,7 +422,7 @@ document.querySelector("#rate-input").addEventListener("change", () => {
             break;
         case "weekend":
             createInput = new CreateInput(option.value)
-            // Create weekend hours
+            // Check if weekend hours does not exist and create weekend hours
             if (weekendHours === null) {
                 weekendHours = new CreateInput("weekend-hours")
                 weekendHours.setName("hours")
@@ -428,7 +433,7 @@ document.querySelector("#rate-input").addEventListener("change", () => {
             break;
     }
 
-    // Switch to next input 
+    // remove elements within the div #rate-input and switch to div #name-input
     option.remove()
     document.querySelector("#rate-input").classList.remove("input-group", "me-2")
     CreateInput.createNameInput()
@@ -437,23 +442,25 @@ document.querySelector("#rate-input").addEventListener("change", () => {
 document.querySelector("#name-input").addEventListener("click", e => {
     if (e.target.id !== "enter-name") {return}
 
-    // Check for entered value
+    // Check for entered value. Return if value is invalid
     const newName = document.querySelector("#new-name")
     newName.addEventListener("input", () => validity.Validation("new-name", "remove", /\w/))
     validity.Validation("new-name", "add", "")
     if (!newName.value) {return}
 
-    // Value entered
+    // Prevent named duplicates 
     if (UI.preventDuplicate(newName.value)) {return}
+
+    // Value entered
     createInput.setName(newName.value)
     createInput.setPlaceholder(newName.value)
 
-    // remove elements
+    // remove elements within the div #name-input after clicking enter
     const nameInput = document.querySelector("#name-input")
     Array.from(nameInput.children).forEach(child => child.remove())
     nameInput.classList.remove("input-group", "me-2")
 
-    // finalize
+    // Create the new rate
     createInput.finalizeNewRate(createInput.week)
 
     const earning = new Earning(createInput.name, createInput.week)
@@ -465,4 +472,7 @@ document.querySelector("#name-input").addEventListener("click", e => {
 })
 
 // Delete Rate
-document.querySelector("#earning-frm").addEventListener("click", e => CreateInput.deleteInput(e))
+document.querySelector("#earning-frm").addEventListener("click", e => {
+    CreateInput.deleteInput(e)
+    // update total after input is deleted 
+})
