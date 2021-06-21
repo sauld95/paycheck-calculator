@@ -1,4 +1,5 @@
 import * as validity from "../components/validity.js"
+import * as stateIncomeCalc from "../state-income-tax-calculation.js"
 
 export const appData = {
     hours: {
@@ -53,9 +54,13 @@ const wageHandler = () => {
     D.fed_allowance = parseInt(getOptionsValue('fed-allowance'))
     D.state_allowance = parseInt(getOptionsValue('state-allowance'))
 
-    // Taxes table: Change state name for withholding
+    // Taxes table: Change state withholding name and amount
     document.querySelector("#state-withhold-select").textContent = D.state
 
+    const regularRate = document.querySelector(".earning-row-title").nextElementSibling.textContent
+    if (regularRate != 0) {
+        document.querySelector("#state-withhold").nextElementSibling.textContent = `$ ${stateIncomeCalc.stateWH(D.state).toFixed(2)}`
+    }
 }
 
 // Connect to form after submit

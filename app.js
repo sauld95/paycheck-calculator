@@ -1,6 +1,7 @@
 import * as validity from "./components/validity.js"
 import * as taxCalc from "./withholding-info/tax-calc.js"
 import * as withhold from "./withholding-info/tax-withholding-data.js"
+import * as stateIncomeCalc from "./state-income-tax-calculation.js"
 
 class Earning {
     constructor (name, week) {
@@ -232,7 +233,7 @@ class Calc {
                 value = hour1
                 break;
             case 'weekday':
-                value = parseFloat((hour1 - hour2).toFixed(2)) // Prevent from going more than 2 decimal places
+                value = parseFloat((hour1 - hour2).toFixed(2))
                 break;
             case 'weekend':
                 value = hour2
@@ -260,12 +261,17 @@ class Calc {
 
     }
     static social() {
-        const { social } = taxCalc.appData.withholding
+        const { earning_total } = taxCalc.appData.table
+        let { social } = taxCalc.appData.withholding
         const { percent } = withhold.FICA.Social
         
-        social = social * percent
+        return social = earning_total * percent
     }
 }
+
+//================//
+// Event Listener //
+//================//
 
 // On load, create initial row for Earning Table
 document.addEventListener("DOMContentLoaded", () => {
@@ -282,9 +288,11 @@ document.addEventListener("DOMContentLoaded", () => {
 document.querySelector("#earning-frm").addEventListener("submit", e => {
     e.preventDefault()
     
-    // Add "is-invalid" class if value is if a state is not selected
+    /* 
+    Add "is-invalid" class if a state is not selected 
+    or if main input (main-earning, main hours) is left empty or no integer is typed
+    */
     validity.Validation("state", "add", "")
-    // Add "is-invalid" class if value is empty or no integer is typed
     validity.Validation("main-earning", "add", "", /[^0-9.]+/gi)
     validity.Validation("week-hours", "add", "", /[^0-9.]+/gi)
 
@@ -338,7 +346,7 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
     })
     
 
-    // Check overtime and set or delete overtime
+    // Check if hours exceed 40 hours and set or delete overtime
     if (hour1.hours > 40) {
         let preAmount = Calc.totalAmount()
 
@@ -356,39 +364,40 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
         UI.deleteEarning('overtime')
     }
 
-    // Get final total amount for the earning table
+    /* 
+    Get final total amount for the earning table
+    Set total amount in tax-calc.js and the Total in the earning table
+    */
     let finalAmount = Calc.totalAmount()
 
-    // Amount set in tax-calc.js
     taxCalc.appData.table.earning_total = finalAmount
-
-    // Set final total amount for the earning table
     document.querySelector("#earning-tbl-total").nextElementSibling.textContent = `$ ${finalAmount.toFixed(2)}`
 
-    // Tax Table
-    const D = taxCalc.appData
-    const WF = withhold.FICA
-    const status = D.taxInfo.status
+    //===================//
+    // Tax Table Section //
+    //===================//
+    const {table, taxInfo, withholding} = taxCalc.appData
+    const {threshold, percent} = withhold.FICA.Medicare
     
-    // FICA Social Security
-    D.withholding.social = D.table.earning_total * WF.Social.percent
-    document.querySelector("#fica-social").nextElementSibling.textContent = `$ ${D.withholding.social.toFixed(2)}`
+    // Update FICA Social Security table
+    let socialAmt = Calc.social()
+    document.querySelector("#fica-social").nextElementSibling.textContent = `$ ${socialAmt.toFixed(2)}`
 
-    // FICA Medicare
-    const medicare = D.withholding.medicare
-
-    if (medicare.addSurtax) {
+    // Update FICA Medicare table
+    if (withholding.medicare.addSurtax) {
         // Useless code for now. Add dates for end of year pay period total
-        const addlAmount = D.table.earning_total - WF.Medicare.threshold[status]
+        const addlAmount = table.earning_total - threshold[taxInfo.status]
         // finish later
     }
 
-    D.withholding.medicare.amount = D.table.earning_total * WF.Medicare.percent.regular
-    document.querySelector("#fica-medicare").nextElementSibling.textContent = `$ ${D.withholding.medicare.amount.toFixed(2)}`
+    withholding.medicare.amount = table.earning_total * percent.regular
+    document.querySelector("#fica-medicare").nextElementSibling.textContent = `$ ${withholding.medicare.amount.toFixed(2)}`
 
+    // Update State Withholding
+    // Go to tax-calc.js for state withhold amount on the event listener 'change' instead of 'submit'
+    document.querySelector("#state-withhold").nextElementSibling.textContent = `$ ${stateIncomeCalc.stateWH(taxInfo.state).toFixed(2)}`
+    
     UI.clearFields()
-
-
 })
 
 // Remove "is-invalid" class after correct value is typed
@@ -401,7 +410,6 @@ document.querySelector("#earning-frm").addEventListener("input", () => {
 document.querySelector("#add-pay").addEventListener("click", () => {
     CreateInput.createOptionsRate()
 
-    // disable buttons to prevent submitting until the rate is created
     document.querySelector("#add-pay").disabled = true
     document.querySelector("#calculate").disabled = true
 
@@ -448,12 +456,14 @@ document.querySelector("#name-input").addEventListener("click", e => {
     validity.Validation("new-name", "add", "")
     if (!newName.value) {return}
 
+    let letterCase = newName.value.charAt(0).toUpperCase() + newName.value.slice(1).toLowerCase();
+
     // Prevent named duplicates 
-    if (UI.preventDuplicate(newName.value)) {return}
+    if (UI.preventDuplicate(letterCase)) {return}
 
     // Value entered
-    createInput.setName(newName.value)
-    createInput.setPlaceholder(newName.value)
+    createInput.setName(letterCase)
+    createInput.setPlaceholder(letterCase)
 
     // remove elements within the div #name-input after clicking enter
     const nameInput = document.querySelector("#name-input")

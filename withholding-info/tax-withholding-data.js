@@ -1,3 +1,12 @@
+export const PayPeriod = {
+    quarterly: 4,
+    monthly: 12,
+    semimonthly: 24,
+    biweekly: 26,
+    weekly: 52,
+    daily: 260
+}
+
 export const FICA = {
     Social: {
         percent: .062,
@@ -31,15 +40,6 @@ export const FICA = {
 // https://www.irs.gov/pub/irs-pdf/p15t.pdf
 const Federal = {
     // Step 1 annualWage = Taxable wage * pay period
-    PayPeriod: {
-        quarterly: 4,
-        monthly: 12,
-        semimonthly: 24,
-        biweekly: 26,
-        weekly: 52,
-        daily: 260,
-    },
-
     /* 
     Step 2.1 adjusted = annualWage - Arr[0][0-7]
     Step 2.2 percAmt = adjusted * PMT.taxBracket[0-7]
@@ -68,17 +68,17 @@ const Federal = {
 export const States = {
     // https://www.revenue.wi.gov/DOR%20Publications/pb166.pdf
     WI: {
-        taxRate: [
-            [10910, 21820, 240190],
-            [.04, .0584, .0627, .0765]
-        ],
+        taxRate: {
+            annual_net: [240190, 21820, 10910, 0],
+            tax: [.0765, .0627, .0584, .04]
+        },
         deductions: {
             single: [
                 .12, // Percent for annual gross earnings in excess
                 [15200, 62950], // Gross Earnings
                 [5730, 0] // MinMax Deduction
             ],
-            married: [
+            marriedJ: [
                 .2, // Percent for annual gross earnings in excess
                 [21400, 60750], // Gross Earnings
                 [7870, 0] // MinMax Deduction
