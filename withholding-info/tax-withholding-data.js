@@ -56,18 +56,19 @@ export const Federal = {
             [0, 0, 27.3, 119.58, 255.54, 618.18, 891.78, 3006.83]
         ]
     },
+    // TODO: Finish updating schedule bracket
     biweekly: {
         marriedJ: [
-            [],
-            []
+            [0, 965, 1731, 4083, 7610, 13652, 17075, 25131],
+            [0, 0, 76.6, 358.84, 1134.78, 2584.86, 3680.22, 6499.82]
         ],
         single: [
-            [],
-            []
+            [0, 483, 865, 2041, 3805, 6826, 8538, 20621],
+            [0, 0, 38.2, 179.32, 567.4, 1292.44, 1840.28, 6069.33]
         ],
         hoh: [
-            [],
-            []
+            [0, 723, 1269, 2808, 4044, 7065, 8777, 20862],
+            [0, 0, 54.6, 239.28, 511.2, 1236.24, 1784.08, 6013.83]
         ]
     },
     semimonthly: {
@@ -138,6 +139,7 @@ export const States = {
     },
     IL: {
         // Allowance: https://www2.illinois.gov/rev/forms/withholding/Documents/currentyear/il-w-4.pdf
+        // TODO: Change state allowance for IL to two different allowances
         allowanceLine1: 2375,
         allowanceLine2: 1000,
         taxRate: .0495

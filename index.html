@@ -111,19 +111,19 @@
                             <tbody>
                                 <tr>
                                     <th scope="row" id="fed-withhold">Fed W/H</th>
-                                    <td>0</td>
+                                    <td class="tax-row-amount">0</td>
                                 </tr>
                                 <tr>
                                     <th scope="row" id="fica-social">FICA Social</th>
-                                    <td>0</td>
+                                    <td class="tax-row-amount">0</td>
                                 </tr>
                                 <tr>
                                     <th scope="row" id="fica-medicare">FICA Medicare</th>
-                                    <td>0</td>
+                                    <td class="tax-row-amount">0</td>
                                 </tr>
                                 <tr>
                                     <th scope="row" id="state-withhold"><span id="state-withhold-select"></span> W/H</th>
-                                    <td>0</td>
+                                    <td class="tax-row-amount">0</td>
                                 </tr>
                             </tbody>
                             <tfoot>
@@ -148,10 +148,10 @@
                             <tbody>
                                 <tr>
                                     <th scope="row">Current</th>
-                                    <td>0</td>
-                                    <td>0</td>
-                                    <td>0</td>
-                                    <td>0</td>
+                                    <td id="gross">0</td>
+                                    <td id="taxable">0</td>
+                                    <td id="taxes">0</td>
+                                    <td id="net">0</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -165,6 +165,6 @@
         integrity="sha384-p34f1UUtsS3wqzfto5wAAmdvj+osOnFyQFpp4Ua3gs/ZVWx6oOypYoCJhGGScy+8" crossorigin="anonymous">
     </script>
     <script type="module" src="/app.js"></script>
-    <script type="module" src="/withholding-info/tax-calc.js"></script>
+    <script type="module" src="/withholding-info/tax-data.js"></script>
 </body>
 </html>

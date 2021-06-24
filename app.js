@@ -1,5 +1,5 @@
 import * as validity from "./components/validity.js"
-import * as taxCalc from "./withholding-info/tax-calc.js"
+import * as taxData from "./withholding-info/tax-data.js"
 import * as withhold from "./withholding-info/tax-withholding-data.js"
 import * as stateIncomeCalc from "./state-income-tax-calculation.js"
 
@@ -174,7 +174,7 @@ class UI {
         <th scope="row" class="earning-row-title">${earning.name}</th>
         <td>${earning.rate}</td>
         <td>${earning.hours}</td>
-        <td>${earning.amount}</td>
+        <td class="earning-row-amount">${earning.amount}</td>
        `
 
        earningList.appendChild(row)
@@ -187,7 +187,7 @@ class UI {
          <th scope="row" class="earning-row-title">${earning.name}</th>
          <td>${earning.rate}</td>
          <td>${earning.hours}</td>
-         <td>${earning.amount}</td>
+         <td class="earning-row-amount">${earning.amount}</td>
         `
 
         const firstTitle = document.querySelector(".earning-row-title").parentElement.nextElementSibling
@@ -250,10 +250,10 @@ class Calc {
     static getAmount(rate, hours, object) {
         return object.setAmount((rate * hours))
     }
-    static totalAmount() {
-        const earningList = Array.from(document.querySelectorAll(".earning-row-title"))
+    static totalAmount(classSelector) {
+        const earningList = Array.from(document.querySelectorAll(classSelector))
         const regex = /[0-9]+.[0-9]{1,2}/
-        let amountArr = earningList.map(earn => parseFloat(earn.parentElement.lastElementChild.textContent.match(regex)[0]))
+        let amountArr = earningList.map(earn => parseFloat(earn.textContent.match(regex)[0]))
         
         return parseFloat((amountArr.reduce((total, sum) => {return total + sum})).toFixed(2))
     }
@@ -276,10 +276,10 @@ class Calc {
         return ((totalWage - lessThanWageAmt) * taxPercent) + tentativeAmt
     }
     static medicare() {
-
+        // TODO: Medicare: Work on medicare function
     }
     static social(totalWage) {
-        let { social } = taxCalc.appData.withholding
+        let { social } = taxData.appData.withholding
         const { percent } = withhold.FICA.Social
         
         return social = totalWage * percent
@@ -365,7 +365,7 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
 
     // Check if hours exceed 40 hours and set or delete overtime
     if (hour1.hours > 40) {
-        let preAmount = Calc.totalAmount()
+        let preAmount = Calc.totalAmount(".earning-row-amount")
 
         UI.deleteEarning('overtime')
 
@@ -383,17 +383,17 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
 
     /* 
     Get final total amount for the earning table
-    Set total amount in tax-calc.js and the Total in the earning table
+    Set total amount in tax-data.js and the Total in the earning table
     */
-    let finalAmount = Calc.totalAmount()
+    let finalAmount = Calc.totalAmount(".earning-row-amount")
 
-    taxCalc.appData.table.earning_total = finalAmount
+    taxData.appData.table.earning_total = finalAmount
     document.querySelector("#earning-tbl-total").nextElementSibling.textContent = `$ ${finalAmount.toFixed(2)}`
 
     //===================//
     // Tax Table Section //
     //===================//
-    const {table, taxInfo, withholding} = taxCalc.appData
+    const {table, taxInfo, withholding} = taxData.appData
     const {threshold, percent} = withhold.FICA.Medicare
     
     // Update FICA Social Security table
@@ -401,6 +401,7 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
     document.querySelector("#fica-social").nextElementSibling.textContent = `$ ${socialAmt.toFixed(2)}`
 
     // Update FICA Medicare table
+    // TODO: Medicare: Move code to Calc.medicare function
     if (withholding.medicare.addSurtax) {
         // Useless code for now. Add dates for end of year pay period total
         const addlAmount = table.earning_total - threshold[taxInfo.status]
@@ -411,13 +412,36 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
     document.querySelector("#fica-medicare").nextElementSibling.textContent = `$ ${withholding.medicare.amount.toFixed(2)}`
 
     // Update State Withholding
-    // Go to tax-calc.js for state withhold amount on the event listener 'change' instead of 'submit'
+    // Go to tax-data.js for state withhold amount on the event listener 'change' instead of 'submit'
     document.querySelector("#state-withhold").nextElementSibling.textContent = `$ ${stateIncomeCalc.stateWH(taxInfo.state).toFixed(2)}`
 
     //Update Federal Withholding
     let federalWH = Calc.federal(taxInfo.freq, finalAmount, taxInfo.status)
     document.querySelector("#fed-withhold").nextElementSibling.textContent = `$ ${federalWH.toFixed(2)}`
+
+    /* 
+    Get final total amount for the tax table
+    Set total amount in tax-data.js and the Total in the tax table
+    */
+    let finalTaxAmount = Calc.totalAmount(".tax-row-amount")
+
+    taxData.appData.table.tax = finalTaxAmount
+    document.querySelector("#tax-tbl-total").nextElementSibling.textContent = `$ ${finalTaxAmount.toFixed(2)}`
     
+    //=======================//
+    // Summary Table Section //
+    //=======================//
+
+    let gross = document.querySelector("#gross")
+    let taxable = document.querySelector("#taxable")
+    let taxes = document.querySelector("#taxes")
+    let net = document.querySelector("#net")
+
+    gross.textContent = `$ ${finalAmount}`
+    taxable.textContent = `$ ${finalAmount}`
+    taxes.textContent = `$ ${finalTaxAmount}`
+    net.textContent = `$ ${(finalAmount - finalTaxAmount).toFixed(2)}`
+
     UI.clearFields()
 })
 
@@ -504,5 +528,5 @@ document.querySelector("#name-input").addEventListener("click", e => {
 // Delete Rate
 document.querySelector("#earning-frm").addEventListener("click", e => {
     CreateInput.deleteInput(e)
-    // update total after input is deleted 
+    // TODO: update total after input is deleted 
 })

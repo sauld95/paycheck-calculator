@@ -1,4 +1,4 @@
-import * as taxCalc from "./withholding-info/tax-calc.js"
+import * as taxData from "./withholding-info/tax-data.js"
 import * as withhold from "./withholding-info/tax-withholding-data.js"
 
 class WithholdingCalc {
@@ -7,14 +7,13 @@ class WithholdingCalc {
     }
     static il(totalWage, allowance1, allowance2, payPeriod) {
         const {IL} = withhold.States
-
         return IL.taxRate * (totalWage - (((allowance1 * IL.allowanceLine1) + (allowance2 * IL.allowanceLine2)) / payPeriod))
     }
 }
 
 export function stateWH(state) {
-    let { status, freq } = taxCalc.appData.taxInfo
-    const { earning_total } = taxCalc.appData.table
+    let { status, freq } = taxData.appData.taxInfo
+    const { earning_total } = taxData.appData.table
     const freqNum = withhold.PayPeriod[freq]
     const annualGross = earning_total * freqNum
 
