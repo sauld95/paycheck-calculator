@@ -38,27 +38,78 @@ export const FICA = {
 }
 
 // https://www.irs.gov/pub/irs-pdf/p15t.pdf
-const Federal = {
-    // Step 1 annualWage = Taxable wage * pay period
-    /* 
-    Step 2.1 adjusted = annualWage - Arr[0][0-7]
-    Step 2.2 percAmt = adjusted * PMT.taxBracket[0-7]
-    Step 2.3 withhold = Arr[1][0-7] + percAmt
-    Step 2.4 withhold / pay period
-    */ 
-    PMT: {
-        taxBracket: [0, .1, .12, .22, .24, .32, .35, .37],
+// Using the Percentage Method Tables for Manual Payroll Systems With Forms W-4 From 2020 or Later
+export const Federal = {
+    taxBracket: [0, .1, .12, .22, .24, .32, .35, .37],
+    // Below is the STANDARD withholding rate schedule
+    weekly: {
         marriedJ: [
-            [0, 12200, 32100, 93250, 184950, 342050, 431050, 640500], // Annual Wage Amount
-            [0, 0, 1990, 9328, 29502, 67206, 95686, 168993.5], // Tentative Amount to Withhold
+            [0, 483, 865, 2041, 3805, 6826, 8538, 12565],
+            [0, 0, 38.2, 179.32, 567.4, 1292.44, 1840.28, 3249.73]
         ],
         single: [
-            [0, 3950, 13900, 44475, 90325, 168875, 213375, 527550], // Annual Wage Amount
-            [0, 0, 995, 4664, 14751, 33603, 47843, 157804.25], // Tentative Amount to Withhold
+            [0, 241, 433, 1021, 1902, 3413, 4269, 10311],
+            [0, 0, 19.2, 89.76, 283.58, 646.22, 920.14, 3034.84]
         ],
         hoh: [
-            [0, 10200, 24400, 64400, 96550, 175100, 219600, 533800], // Annual Wage Amount
-            [0, 0, 1420, 6220, 13293, 32145, 46385, 156355], // Tentative Amount to Withhold
+            [0, 362, 635, 1404, 2022, 3533, 4388, 10431],
+            [0, 0, 27.3, 119.58, 255.54, 618.18, 891.78, 3006.83]
+        ]
+    },
+    biweekly: {
+        marriedJ: [
+            [],
+            []
+        ],
+        single: [
+            [],
+            []
+        ],
+        hoh: [
+            [],
+            []
+        ]
+    },
+    semimonthly: {
+        marriedJ: [
+            [],
+            []
+        ],
+        single: [
+            [],
+            []
+        ],
+        hoh: [
+            [],
+            []
+        ]
+    },
+    monthly: {
+        marriedJ: [
+            [],
+            []
+        ],
+        single: [
+            [],
+            []
+        ],
+        hoh: [
+            [],
+            []
+        ]
+    },
+    daily: {
+        marriedJ: [
+            [],
+            []
+        ],
+        single: [
+            [],
+            []
+        ],
+        hoh: [
+            [],
+            []
         ]
     }
 }
@@ -86,6 +137,9 @@ export const States = {
         }
     },
     IL: {
-
+        // Allowance: https://www2.illinois.gov/rev/forms/withholding/Documents/currentyear/il-w-4.pdf
+        allowanceLine1: 2375,
+        allowanceLine2: 1000,
+        taxRate: .0495
     }
 }

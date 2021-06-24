@@ -257,15 +257,32 @@ class Calc {
         
         return parseFloat((amountArr.reduce((total, sum) => {return total + sum})).toFixed(2))
     }
+    static federal(frequency, totalWage, status) {
+        const period = withhold.Federal[frequency]
+        let lessThanWageAmt = 0
+        let taxPercent = 0
+        let tentativeAmt = 0
+
+        period[status][0].forEach((amount, i) => {
+            if (amount > totalWage) {
+                return
+            } else {
+                lessThanWageAmt = amount
+                taxPercent = withhold.Federal.taxBracket[i]
+                tentativeAmt = period[status][1][i]
+            }
+        })
+
+        return ((totalWage - lessThanWageAmt) * taxPercent) + tentativeAmt
+    }
     static medicare() {
 
     }
-    static social() {
-        const { earning_total } = taxCalc.appData.table
+    static social(totalWage) {
         let { social } = taxCalc.appData.withholding
         const { percent } = withhold.FICA.Social
         
-        return social = earning_total * percent
+        return social = totalWage * percent
     }
 }
 
@@ -380,7 +397,7 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
     const {threshold, percent} = withhold.FICA.Medicare
     
     // Update FICA Social Security table
-    let socialAmt = Calc.social()
+    let socialAmt = Calc.social(finalAmount)
     document.querySelector("#fica-social").nextElementSibling.textContent = `$ ${socialAmt.toFixed(2)}`
 
     // Update FICA Medicare table
@@ -396,6 +413,10 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
     // Update State Withholding
     // Go to tax-calc.js for state withhold amount on the event listener 'change' instead of 'submit'
     document.querySelector("#state-withhold").nextElementSibling.textContent = `$ ${stateIncomeCalc.stateWH(taxInfo.state).toFixed(2)}`
+
+    //Update Federal Withholding
+    let federalWH = Calc.federal(taxInfo.freq, finalAmount, taxInfo.status)
+    document.querySelector("#fed-withhold").nextElementSibling.textContent = `$ ${federalWH.toFixed(2)}`
     
     UI.clearFields()
 })
@@ -470,13 +491,12 @@ document.querySelector("#name-input").addEventListener("click", e => {
     Array.from(nameInput.children).forEach(child => child.remove())
     nameInput.classList.remove("input-group", "me-2")
 
-    // Create the new rate
+    // Create the new rate and add it to the table
     createInput.finalizeNewRate(createInput.week)
 
     const earning = new Earning(createInput.name, createInput.week)
     UI.createEarningList(earning)
 
-    // enable buttons
     document.querySelector("#add-pay").disabled = false
     document.querySelector("#calculate").disabled = false
 })

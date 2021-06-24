@@ -1,6 +1,17 @@
 import * as taxCalc from "./withholding-info/tax-calc.js"
 import * as withhold from "./withholding-info/tax-withholding-data.js"
 
+class WithholdingCalc {
+    static wi(deductionMax, percent, grossEarning, annualEarning) {
+        return deductionMax - (percent * (annualEarning - grossEarning))
+    }
+    static il(totalWage, allowance1, allowance2, payPeriod) {
+        const {IL} = withhold.States
+
+        return IL.taxRate * (totalWage - (((allowance1 * IL.allowanceLine1) + (allowance2 * IL.allowanceLine2)) / payPeriod))
+    }
+}
+
 export function stateWH(state) {
     let { status, freq } = taxCalc.appData.taxInfo
     const { earning_total } = taxCalc.appData.table
@@ -8,14 +19,11 @@ export function stateWH(state) {
     const annualGross = earning_total * freqNum
 
     switch (state) {
+        // Link for the provided methods used to calculate withholding
         // https://www.revenue.wi.gov/DOR%20Publications/pb166.pdf
         case "WI":
             const { taxRate, deductions } = withhold.States.WI
             let deductionAmt
-
-            function calcDeduction(deductionMax, percent, grossEarning) {
-                return deductionMax - (percent * (annualGross - grossEarning))
-            }
 
             // Get deduction Amount 
             switch (status) {
@@ -30,7 +38,7 @@ export function stateWH(state) {
                     if (annualGross > deductions.single[1][1]) {
                         deductionAmt = deductions.single[2][1]
                     } else {
-                        deductionAmt = calcDeduction(deductions.single[2][0], deductions.single[0], deductions.single[1][0])
+                        deductionAmt = WithholdingCalc.wi(deductions.single[2][0], deductions.single[0], deductions.single[1][0], annualGross)
                     }
                     break;
                 case 'marriedJ':
@@ -40,7 +48,7 @@ export function stateWH(state) {
                     if (annualGross > deductions.marriedJ[1][1]) {
                         deductionAmt = deductions.marriedJ[2][1]
                     } else {
-                        deductionAmt = calcDeduction(deductions.marriedJ[2][0], deductions.marriedJ[0], deductions.marriedJ[1][0])
+                        deductionAmt = WithholdingCalc.wi(deductions.marriedJ[2][0], deductions.marriedJ[0], deductions.marriedJ[1][0], annualGross)
                     }
                     break;
             }
@@ -66,10 +74,11 @@ export function stateWH(state) {
 
             return computedTax / freqNum
 
+        // Link for the provided methods used to calculate withholding
         // https://www2.illinois.gov/rev/forms/withholding/Documents/currentyear/IL-700-T.pdf
         case "IL":
             
-            return 0
+            return WithholdingCalc.il(earning_total, 0, 0, freqNum)
     
         default:
             break;

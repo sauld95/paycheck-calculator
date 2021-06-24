@@ -46,20 +46,20 @@ const getOptionsValue = (elementID) => {
 // After submit retrieve ID from the options
 const wageHandler = () => {
     validity.Validation("state", "remove", /\S/)
-    const D = appData.taxInfo
+    const {taxInfo} = appData
 
-    D.state = getOptionsValue('state');
-    D.status = getOptionsValue('status');
-    D.freq = getOptionsValue('frequency')
-    D.fed_allowance = parseInt(getOptionsValue('fed-allowance'))
-    D.state_allowance = parseInt(getOptionsValue('state-allowance'))
+    taxInfo.state = getOptionsValue('state');
+    taxInfo.status = getOptionsValue('status');
+    taxInfo.freq = getOptionsValue('frequency')
+    taxInfo.fed_allowance = parseInt(getOptionsValue('fed-allowance'))
+    taxInfo.state_allowance = parseInt(getOptionsValue('state-allowance'))
 
     // Taxes table: Change state withholding name and amount
-    document.querySelector("#state-withhold-select").textContent = D.state
+    document.querySelector("#state-withhold-select").textContent = taxInfo.state
 
     const regularRate = document.querySelector(".earning-row-title").nextElementSibling.textContent
     if (regularRate != 0) {
-        document.querySelector("#state-withhold").nextElementSibling.textContent = `$ ${stateIncomeCalc.stateWH(D.state).toFixed(2)}`
+        document.querySelector("#state-withhold").nextElementSibling.textContent = `$ ${stateIncomeCalc.stateWH(taxInfo.state).toFixed(2)}`
     }
 }
 
