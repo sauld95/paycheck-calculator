@@ -2,293 +2,7 @@ import * as validity from "./components/validity.js"
 import * as taxData from "./withholding-info/tax-data.js"
 import * as withhold from "./withholding-info/tax-withholding-data.js"
 import * as stateIncomeCalc from "./state-income-tax-calculation.js"
-
-class Earning {
-    constructor (name, week) {
-        this.name = name
-        this.week = week
-        this.rate = 0
-        this.hours = 0
-        this.amount = 0
-    }
-    setRate(rate) {
-        return this.rate = `$ ${rate.toFixed(2)}`
-    }
-    setHours(hours) {
-        return this.hours = hours
-    }
-    setAmount(amount) {
-        return this.amount = `$ ${amount.toFixed(2)}`
-    }
-}
-
-// Used for rates and new weekend hour
-class CreateInput {
-    constructor(week) {
-        this.week = week
-        this.name = ''
-        this.classArray = ["form-control", "me-sm-2"]
-        this.placeholder = ''
-    }
-    setName(name) {
-        return this.name = name
-    }
-    setPlaceholder(placeholder) {
-        return this.placeholder = `${placeholder} rate`
-    }
-    static createOptionsRate() {
-        document.querySelector("#rate-input").classList.add("input-group", "me-2")
-
-        const select = document.createElement("select")
-        select.classList.add("form-select")
-        select.setAttribute("aria-label", "Default select example")
-
-        select.innerHTML = `
-        <option value="select" selected>--Select Rate--</option>
-        <option value="allday">All Day</option>
-        <option value="weekday">Weekday</option>
-        <option value="weekend">Weekend</option>
-        `
-
-        document.querySelector("#rate-input").appendChild(select)
-    }
-    static createNameInput() {
-        document.querySelector("#name-input").classList.add("input-group", "me-2")
-        // Create input
-        const input = document.createElement("input")
-        input.setAttribute("type", "text")
-        input.classList.add("form-control")
-        input.setAttribute("placeholder", "Name the rate")
-        input.setAttribute("id", "new-name")
-        input.setAttribute("aria-label", "Name the rate")
-        input.setAttribute("aria-describedby", "enter-name")
-
-        // Create button
-        const btn = document.createElement("button")
-        const txt = document.createTextNode("Enter")
-
-        btn.appendChild(txt)
-
-        btn.classList.add("btn", "btn-secondary")
-        btn.setAttribute("type", "button")
-        btn.setAttribute("id", "enter-name")
-
-        // Append
-        document.querySelector("#name-input").appendChild(input)
-        document.querySelector("#name-input").appendChild(btn)
-    }
-
-    finalizeNewRate(week) {
-        // Creat span
-        const span = document.createElement("span")
-        span.classList.add("label-rate")
-        switch (week) {
-            case "allday":
-                span.setAttribute("title", "All day rate")
-                span.classList.add("A")
-                break;
-            case "weekday":
-                span.setAttribute("title", "Weekday rate")
-                span.classList.add("D")
-                break;
-            case "weekend":
-                span.setAttribute("title", "Weekend rate")
-                span.classList.add("E")
-                break;
-        }
-
-        span.classList.add("input-group-text")
-
-        const input = document.createElement("input")
-        input.setAttribute("type", "text")
-        input.setAttribute("name", this.name)
-        input.classList.add(...this.classArray, "rate-group")
-        input.setAttribute("data-week", this.week)
-        input.setAttribute("placeholder", this.placeholder)
-
-        // Create div
-        const div = document.createElement("div")
-        div.classList.add("input-group")
-
-        div.appendChild(span)
-        div.appendChild(input)
-
-        const parent = document.querySelector("#earning-frm")
-        const reference = document.querySelector("#rate-input")
-
-        parent.insertBefore(div, reference)
-    }
-
-    createWeekendHours() {
-        const input = document.createElement("input")
-
-        input.setAttribute("type", "text")
-        input.setAttribute("name", this.name)
-        input.classList.add(...this.classArray)
-        input.setAttribute("id", this.week)
-        input.setAttribute("placeholder", this.placeholder)
-
-        const parent = document.querySelector("#earning-frm")
-        const reference = document.querySelector("#calculate")
-
-        parent.insertBefore(input, reference)
-    }
-
-    static deleteInput(el) {
-        if (el.target.classList.contains("label-rate")) {
-            // Remove input 
-            el.target.parentElement.remove()
-            UI.deleteEarning(el.target.nextSibling.name)
-
-            // if weekend rate count is equal to 0, delete weekend hours
-            const rateGroup = Array.from(document.querySelectorAll(".rate-group"))
-
-            const count = rateGroup.filter(rate => rate.dataset.week === "weekend").length
-            
-            if (count === 0 && document.querySelector("#weekend-hours") !== null) {
-                document.querySelector("#weekend-hours").remove()
-                weekendHours = null
-            }
-        }
-    }
-
-}
-
-class Hours {
-    constructor (name) {
-        this.name = name
-        this.hours = 0
-    }
-    setHours(hours) {
-        return this.hours = hours
-    }
-}
-
-// UI Functionality
-class UI {
-   static createEarningList(earning) {
-       const earningList = document.querySelector("#earning-tbl-list")
-       const row = document.createElement("tr")
-
-       row.innerHTML = `
-        <th scope="row" class="earning-row-title">${earning.name}</th>
-        <td>${earning.rate}</td>
-        <td>${earning.hours}</td>
-        <td class="earning-row-amount">${earning.amount}</td>
-       `
-
-       earningList.appendChild(row)
-    }
-    static createOvertimeList(earning) {
-        const earningList = document.querySelector("#earning-tbl-list")
-        const row = document.createElement("tr")
- 
-        row.innerHTML = `
-         <th scope="row" class="earning-row-title">${earning.name}</th>
-         <td>${earning.rate}</td>
-         <td>${earning.hours}</td>
-         <td class="earning-row-amount">${earning.amount}</td>
-        `
-
-        const firstTitle = document.querySelector(".earning-row-title").parentElement.nextElementSibling
- 
-        earningList.insertBefore(row, firstTitle)
-     }
-
-   static deleteEarning(name) {
-        const earningList = Array.from(document.querySelectorAll(".earning-row-title"))
-        earningList.forEach(earn => {
-            if (earn.textContent === name) {
-                earn.parentElement.remove()
-            }
-        })
-    }
-    static preventDuplicate(name) {
-        let boolean = false
-        const earningList = Array.from(document.querySelectorAll(".earning-row-title"))
-            earningList.forEach(earn => {
-                if (earn.textContent === name) {
-                    boolean = true
-                }
-        })
-        return boolean
-    }
-    static clearFields() {
-        const wageForm = document.querySelector("#earning-frm")
-        const inputs = Array.from(wageForm.querySelectorAll('input[type="text"]'))
-        inputs.forEach(input => input.value = "")
-    }
-
-    // https://getbootstrap.com/docs/5.0/forms/input-group/#button-addons
-}
-
-// Calculations
-class Calc {
-    static getHours(week, hour1, hour2) {
-        let value = 0;
-
-        switch (week) {
-            case 'main-earning':
-            case 'allday':
-                value = hour1
-                break;
-            case 'weekday':
-                value = parseFloat((hour1 - hour2).toFixed(2))
-                break;
-            case 'weekend':
-                value = hour2
-                break;
-            case 'overtime':
-                value = parseFloat((hour1 - 40).toFixed(2))
-                break;
-        }
-        return value
-    }
-    static overtimeRate(amount, hours) {
-        return (amount / hours) * 0.5
-    }
-    static getAmount(rate, hours, object) {
-        return object.setAmount((rate * hours))
-    }
-    static totalAmount(classSelector) {
-        const earningList = Array.from(document.querySelectorAll(classSelector))
-        const regex = /[0-9]+.[0-9]{1,2}/
-        let amountArr = earningList.map(earn => parseFloat(earn.textContent.match(regex)[0]))
-        
-        return parseFloat((amountArr.reduce((total, sum) => {return total + sum})).toFixed(2))
-    }
-    static federal(frequency, totalWage, status) {
-        const period = withhold.Federal[frequency]
-        let lessThanWageAmt = 0
-        let taxPercent = 0
-        let tentativeAmt = 0
-
-        period[status][0].forEach((amount, i) => {
-            if (amount > totalWage) {
-                return
-            } else {
-                lessThanWageAmt = amount
-                taxPercent = withhold.Federal.taxBracket[i]
-                tentativeAmt = period[status][1][i]
-            }
-        })
-
-        return ((totalWage - lessThanWageAmt) * taxPercent) + tentativeAmt
-    }
-    static medicare() {
-        // TODO: Medicare: Work on medicare function
-    }
-    static social(totalWage) {
-        let { social } = taxData.appData.withholding
-        const { percent } = withhold.FICA.Social
-        
-        return social = totalWage * percent
-    }
-}
-
-//================//
-// Event Listener //
-//================//
+import * as classes from "./classes.js"
 
 // On load, create initial row for Earning Table
 document.addEventListener("DOMContentLoaded", () => {
@@ -296,10 +10,14 @@ document.addEventListener("DOMContentLoaded", () => {
     
     const name = mainRate.name
     const week = mainRate.dataset.week
-        
-    const earning = new Earning(name, week)
-    UI.createEarningList(earning)
+
+    const earning = new classes.Earning(name, week)
+    classes.UI.createEarningList(earning)
 })
+
+//=========================================//
+// On Submit for Table Update #earning-frm //
+//=========================================//
 
 // Submit new values to the Earning table
 document.querySelector("#earning-frm").addEventListener("submit", e => {
@@ -328,15 +46,15 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
     })
 
     // Set Hours
-    const hour1 = new Hours(weekHours.name)
+    const hour1 = new classes.Hours(weekHours.name)
     hour1.setHours(parseFloat(weekHours.value))
 
     let weekendHours = undefined
-    let hour2 = new Hours("weekend-hours")
+    let hour2 = new classes.Hours("weekend-hours")
 
     try {
         weekendHours = document.querySelector("#weekend-hours")
-        hour2 = new Hours(weekendHours.name)
+        hour2 = new classes.Hours(weekendHours.name)
         hour2.setHours(parseFloat(weekendHours.value))
     } catch (err) {
         // continue running the code after the error
@@ -351,41 +69,49 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
         const week = pay.dataset.week
         const rate = parseFloat(pay.value)
 
-        UI.deleteEarning(name)
+        classes.UI.deleteEarning(name)
 
-        const earning = new Earning(name, week)
+        const earning = new classes.Earning(name, week)
         earning.setRate(rate)
-        const hours = earning.setHours(Calc.getHours(week, hour1.hours, hour2.hours))
+        const hours = earning.setHours(classes.Calc.getHours(week, hour1.hours, hour2.hours))
 
-        Calc.getAmount(rate, hours, earning)
+        classes.Calc.getAmount(rate, hours, earning)
 
-        UI.createEarningList(earning)
+        classes.UI.createEarningList(earning)
     })
+
+    const {table, taxInfo, withholding} = taxData.appData
+    const {threshold, percent} = withhold.FICA.Medicare
     
 
+    //=============================//
+    // Overtime Section for weekly //
+    //=============================//
+
+    // See tax-data.js for adding overtime manually for other pay periods besides weekly
     // Check if hours exceed 40 hours and set or delete overtime
-    if (hour1.hours > 40) {
-        let preAmount = Calc.totalAmount(".earning-row-amount")
+    if (hour1.hours > 40 && taxInfo.freq === "weekly") {
+        let preAmount = classes.Calc.totalAmount(".earning-row-amount")
 
-        UI.deleteEarning('overtime')
+        classes.UI.deleteEarning('overtime')
 
-        const overtime = new Earning('overtime', 'ot-days')
-        const rate = Calc.overtimeRate(preAmount, hour1.hours)
-        const hours = overtime.setHours(Calc.getHours('overtime', hour1.hours, hour2.hours))
+        const overtime = new classes.Earning('overtime', 'ot-days')
+        const rate = classes.Calc.overtimeRate(preAmount, hour1.hours)
+        const hours = overtime.setHours(classes.Calc.getHours('overtime', hour1.hours, hour2.hours))
 
         overtime.setRate(rate)
-        Calc.getAmount(rate, hours, overtime)
+        classes.Calc.getAmount(rate, hours, overtime)
 
-        UI.createOvertimeList(overtime)
+        classes.UI.createOvertimeList(overtime)
     } else {
-        UI.deleteEarning('overtime')
+        classes.UI.deleteEarning('overtime')
     }
 
     /* 
     Get final total amount for the earning table
     Set total amount in tax-data.js and the Total in the earning table
     */
-    let finalAmount = Calc.totalAmount(".earning-row-amount")
+    let finalAmount = classes.Calc.totalAmount(".earning-row-amount")
 
     taxData.appData.table.earning_total = finalAmount
     document.querySelector("#earning-tbl-total").nextElementSibling.textContent = `$ ${finalAmount.toFixed(2)}`
@@ -393,11 +119,9 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
     //===================//
     // Tax Table Section //
     //===================//
-    const {table, taxInfo, withholding} = taxData.appData
-    const {threshold, percent} = withhold.FICA.Medicare
     
     // Update FICA Social Security table
-    let socialAmt = Calc.social(finalAmount)
+    let socialAmt = classes.Calc.social(finalAmount)
     document.querySelector("#fica-social").nextElementSibling.textContent = `$ ${socialAmt.toFixed(2)}`
 
     // Update FICA Medicare table
@@ -416,14 +140,14 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
     document.querySelector("#state-withhold").nextElementSibling.textContent = `$ ${stateIncomeCalc.stateWH(taxInfo.state).toFixed(2)}`
 
     //Update Federal Withholding
-    let federalWH = Calc.federal(taxInfo.freq, finalAmount, taxInfo.status)
+    let federalWH = stateIncomeCalc.fedWH(taxInfo.freq, finalAmount, taxInfo.status)
     document.querySelector("#fed-withhold").nextElementSibling.textContent = `$ ${federalWH.toFixed(2)}`
 
     /* 
     Get final total amount for the tax table
     Set total amount in tax-data.js and the Total in the tax table
     */
-    let finalTaxAmount = Calc.totalAmount(".tax-row-amount")
+    let finalTaxAmount = classes.Calc.totalAmount(".tax-row-amount")
 
     taxData.appData.table.tax = finalTaxAmount
     document.querySelector("#tax-tbl-total").nextElementSibling.textContent = `$ ${finalTaxAmount.toFixed(2)}`
@@ -442,7 +166,7 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
     taxes.textContent = `$ ${finalTaxAmount}`
     net.textContent = `$ ${(finalAmount - finalTaxAmount).toFixed(2)}`
 
-    UI.clearFields()
+    classes.UI.clearFields()
 })
 
 // Remove "is-invalid" class after correct value is typed
@@ -451,9 +175,62 @@ document.querySelector("#earning-frm").addEventListener("input", () => {
     validity.Validation("week-hours", "remove", /^[0-9]+\.?[0-9]?[0-9]?/g)
 })
 
+//==========================================//
+// On Change for Table Update #tax-info-frm //
+//==========================================//
+
+document.querySelector("#tax-info-frm").addEventListener("change", () => {
+    const getOptionsValue = (elementID) => {
+        return document.getElementById(elementID).value
+    }
+
+    validity.Validation("state", "remove", /\S/)
+    const {taxInfo, table} = taxData.appData
+
+    taxInfo.state = getOptionsValue('state');
+    taxInfo.status = getOptionsValue('status');
+    taxInfo.freq = getOptionsValue('frequency')
+    taxInfo.fed_allowance = parseInt(getOptionsValue('fed-allowance'))
+    taxInfo.state_allowance = parseInt(getOptionsValue('state-allowance'))
+
+    // Taxes table: Change state withholding name and amount
+    document.querySelector("#state-withhold-select").textContent = taxInfo.state
+
+    const regularRate = document.querySelector(".earning-row-title").nextElementSibling.textContent
+    if (regularRate != 0) {
+        document.querySelector("#state-withhold").nextElementSibling.textContent = `$ ${stateIncomeCalc.stateWH(taxInfo.state).toFixed(2)}`
+        document.querySelector("#fed-withhold").nextElementSibling.textContent = `$ ${stateIncomeCalc.fedWH(taxInfo.freq, table.earning_total, taxInfo.status).toFixed(2)}`
+    
+        /* 
+        Get final total amount for the tax table
+        Set total amount in tax-data.js and the Total in the tax table
+        */
+        let finalTaxAmount = classes.Calc.totalAmount(".tax-row-amount")
+
+        taxData.appData.table.tax = finalTaxAmount
+        document.querySelector("#tax-tbl-total").nextElementSibling.textContent = `$ ${finalTaxAmount.toFixed(2)}`
+    
+        let taxes = document.querySelector("#taxes")
+        let net = document.querySelector("#net")
+
+        taxes.textContent = `$ ${finalTaxAmount}`
+        net.textContent = `$ ${(table.earning_total - finalTaxAmount).toFixed(2)}`
+    }
+
+    // Include overtime hours input for pay periods that are not weekly
+    if (taxInfo.freq !== "weekly" || taxInfo.freq !== "daily") {
+        // TODO: Set a manual overtime input for other pay paeriods besids weekly
+        // TODO: first move all class from app.js to it's own file for easier access
+    }
+})
+
+//===============//
+// Init New Rate //
+//===============//
+
 // Begin creating a new rate 
 document.querySelector("#add-pay").addEventListener("click", () => {
-    CreateInput.createOptionsRate()
+    classes.CreateInput.createOptionsRate()
 
     document.querySelector("#add-pay").disabled = true
     document.querySelector("#calculate").disabled = true
@@ -469,15 +246,15 @@ document.querySelector("#rate-input").addEventListener("change", () => {
     switch (option.value) {
         case "select":
             return
-        case "allday":
+        case "everyday":
         case "weekday":
-            createInput = new CreateInput(option.value)
+            createInput = new classes.CreateInput(option.value)
             break;
         case "weekend":
-            createInput = new CreateInput(option.value)
+            createInput = new classes.CreateInput(option.value)
             // Check if weekend hours does not exist and create weekend hours
             if (weekendHours === null) {
-                weekendHours = new CreateInput("weekend-hours")
+                weekendHours = new classes.CreateInput("weekend-hours")
                 weekendHours.setName("hours")
                 weekendHours.placeholder = "Weekend Hours"
 
@@ -489,7 +266,7 @@ document.querySelector("#rate-input").addEventListener("change", () => {
     // remove elements within the div #rate-input and switch to div #name-input
     option.remove()
     document.querySelector("#rate-input").classList.remove("input-group", "me-2")
-    CreateInput.createNameInput()
+    classes.CreateInput.createNameInput()
 })
 
 document.querySelector("#name-input").addEventListener("click", e => {
@@ -504,7 +281,7 @@ document.querySelector("#name-input").addEventListener("click", e => {
     let letterCase = newName.value.charAt(0).toUpperCase() + newName.value.slice(1).toLowerCase();
 
     // Prevent named duplicates 
-    if (UI.preventDuplicate(letterCase)) {return}
+    if (classes.UI.preventDuplicate(letterCase)) {return}
 
     // Value entered
     createInput.setName(letterCase)
@@ -518,8 +295,8 @@ document.querySelector("#name-input").addEventListener("click", e => {
     // Create the new rate and add it to the table
     createInput.finalizeNewRate(createInput.week)
 
-    const earning = new Earning(createInput.name, createInput.week)
-    UI.createEarningList(earning)
+    const earning = new classes.Earning(createInput.name, createInput.week)
+    classes.UI.createEarningList(earning)
 
     document.querySelector("#add-pay").disabled = false
     document.querySelector("#calculate").disabled = false
@@ -527,6 +304,6 @@ document.querySelector("#name-input").addEventListener("click", e => {
 
 // Delete Rate
 document.querySelector("#earning-frm").addEventListener("click", e => {
-    CreateInput.deleteInput(e)
+    classes.CreateInput.deleteInput(e)
     // TODO: update total after input is deleted 
 })

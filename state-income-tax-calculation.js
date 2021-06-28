@@ -83,3 +83,22 @@ export function stateWH(state) {
             break;
     }
 }
+
+export function fedWH(frequency, totalWage, status) {
+    const period = withhold.Federal[frequency]
+    let lessThanWageAmt = 0
+    let taxPercent = 0
+    let tentativeAmt = 0
+
+    period[status][0].forEach((amount, i) => {
+        if (amount > totalWage) {
+            return
+        } else {
+            lessThanWageAmt = amount
+            taxPercent = withhold.Federal.taxBracket[i]
+            tentativeAmt = period[status][1][i]
+        }
+    })
+
+    return ((totalWage - lessThanWageAmt) * taxPercent) + tentativeAmt
+}

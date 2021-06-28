@@ -12,15 +12,22 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <a href="#" class="navbar-brand">Paycheck Calculator</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
         
-            <form class="d-flex" id="earning-frm">
-                <input type="text" name="Regular" class="form-control me-sm-2 rate-group" id="main-earning" data-week="main-earning" placeholder="Regular Rate">
-                <div id="rate-input"></div>
-                <div id="name-input"></div>
-                <button class="btn btn-primary me-2" id="add-pay" title="Add an additional pay, premium pay or weekend pay"><i class="fas fa-plus"></i></button>
-                <input type="text" name="hours" class="form-control me-sm-2" id="week-hours" placeholder="Hours Worked">
-                <input type="submit" class="btn btn-secondary my-2 my-sm-0" value="Calculate" id="calculate">
-            </form>
+            <div class="mt-2 collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="me-auto"></ul>
+                <form class="d-flex" id="earning-frm">
+                    <input type="text" name="Regular" class="form-control me-sm-2 rate-group" id="main-earning" data-week="main-earning" placeholder="Regular Rate">
+                    <div id="rate-input"></div>
+                    <div id="name-input"></div>
+                    <button class="btn btn-primary me-2" id="add-pay" title="Add an additional pay, premium pay or weekend pay"><i class="fas fa-plus"></i></button>
+                    <input type="text" name="hours" class="form-control me-sm-2" id="week-hours" placeholder="Hours Worked">
+                    <input type="submit" class="btn btn-secondary my-2 my-sm-0" value="Calculate" id="calculate">
+                </form>
+            </div>
+            
         </div>
     </nav>
 
@@ -52,13 +59,13 @@
                 <div class="row mb-1">
                     <label for="frequency" class="col-form-label col-sm-3 col-lg-3 col-xl-3">Frequency</label>
                     <div class="col-sm-9 col-lg-9 col-xl-9">
-                        <select class="form-select" id="frequency" disabled>
-                            <option value="daily">Daily</option>
+                        <select class="form-select" id="frequency">
+                            <option value="daily" hidden>Daily</option>
                             <option value="weekly" selected>Weekly</option>
-                            <option value="biweekly">Biweekly</option>
-                            <option value="monthly">Monthly</option>
-                            <option value="semimonthly">Semimonthly</option>
-                            <option value="quarterly">Quarterly</option>
+                            <option value="biweekly" hidden>Biweekly</option>
+                            <option value="monthly" hidden>Monthly</option>
+                            <option value="semimonthly" hidden>Semimonthly</option>
+                            <option value="quarterly" hidden>Quarterly</option>
                         </select>
                     </div>
                 </div>
@@ -75,6 +82,9 @@
                     </div>
                 </div>
 
+                <!-- 
+                    TODO: Move the Earning Form here instead of the navbar.
+                 -->
                 <!-- 
                     Include Pre-Tax Deductions 
                     https://smartasset.com/taxes/paycheck-calculator#FVfiKNtmog
@@ -165,6 +175,5 @@
         integrity="sha384-p34f1UUtsS3wqzfto5wAAmdvj+osOnFyQFpp4Ua3gs/ZVWx6oOypYoCJhGGScy+8" crossorigin="anonymous">
     </script>
     <script type="module" src="/app.js"></script>
-    <script type="module" src="/withholding-info/tax-data.js"></script>
 </body>
 </html>

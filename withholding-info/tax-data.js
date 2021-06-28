@@ -1,6 +1,3 @@
-import * as validity from "../components/validity.js"
-import * as stateIncomeCalc from "../state-income-tax-calculation.js"
-
 export const appData = {
     hours: {
         week_hours: 0,
@@ -36,37 +33,3 @@ export const appData = {
         }
     }
 }
-
-
-// Return the value from the given ID
-const getOptionsValue = (elementID) => {
-    return document.getElementById(elementID).value
-}
-
-// After submit retrieve ID from the options
-const wageHandler = () => {
-    validity.Validation("state", "remove", /\S/)
-    const {taxInfo} = appData
-
-    taxInfo.state = getOptionsValue('state');
-    taxInfo.status = getOptionsValue('status');
-    taxInfo.freq = getOptionsValue('frequency')
-    taxInfo.fed_allowance = parseInt(getOptionsValue('fed-allowance'))
-    taxInfo.state_allowance = parseInt(getOptionsValue('state-allowance'))
-
-    // Taxes table: Change state withholding name and amount
-    document.querySelector("#state-withhold-select").textContent = taxInfo.state
-
-    const regularRate = document.querySelector(".earning-row-title").nextElementSibling.textContent
-    if (regularRate != 0) {
-        document.querySelector("#state-withhold").nextElementSibling.textContent = `$ ${stateIncomeCalc.stateWH(taxInfo.state).toFixed(2)}`
-    }
-}
-
-// Connect to form after submit
-const connectForm = (formId, formSubmitHandler) => {
-    const form = document.getElementById(formId);
-    form.addEventListener('change', formSubmitHandler);
-}
-
-connectForm("tax-info-frm", wageHandler)
