@@ -16,14 +16,14 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
         
-            <div class="mt-2 collapse navbar-collapse" id="navbarSupportedContent">
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="me-auto"></ul>
                 <form class="d-flex" id="earning-frm">
                     <input type="text" name="Regular" class="form-control me-sm-2 rate-group" id="main-earning" data-week="main-earning" placeholder="Regular Rate">
                     <div id="rate-input"></div>
                     <div id="name-input"></div>
-                    <button class="btn btn-primary me-2" id="add-pay" title="Add an additional pay, premium pay or weekend pay"><i class="fas fa-plus"></i></button>
                     <input type="text" name="hours" class="form-control me-sm-2" id="week-hours" placeholder="Hours Worked">
+                    <button class="btn btn-primary me-2" id="add-pay" title="Add an additional pay, premium pay or weekend pay"><i class="fas fa-plus"></i></button>
                     <input type="submit" class="btn btn-secondary my-2 my-sm-0" value="Calculate" id="calculate">
                 </form>
             </div>
@@ -38,7 +38,7 @@
                     <label for="state" class="col-form-label col-sm-3 col-lg-3 col-xl-3">State</label>
                     <div class="col-sm-9 col-lg-9 col-xl-9">
                         <select class="form-select" id="state">
-                            <option value="" selected>--State--</option>
+                            <option value="" selected hidden>--State--</option>
                             <option value="IL">IL</option>
                             <option value="WI">WI</option>
                         </select>
@@ -145,7 +145,7 @@
                 </div>
                 <div class="row gx-1">
                     <div class="col">
-                        <table class="table">
+                        <table class="table" id="summary-tbl">
                             <thead >
                                 <tr class="table-active">
                                     <th scope="col">Summary</th>

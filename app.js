@@ -27,15 +27,13 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
     Add "is-invalid" class if a state is not selected 
     or if main input (main-earning, main hours) is left empty or no integer is typed
     */
-    validity.Validation("state", "add", "")
     validity.Validation("main-earning", "add", "", /[^0-9.]+/gi)
     validity.Validation("week-hours", "add", "", /[^0-9.]+/gi)
 
     // If class contains 'is-invalid', return 
     let mainEarning = document.querySelector("#main-earning")
     const weekHours = document.querySelector("#Week-hours")
-    const stateInput = document.querySelector("#state")
-    if (mainEarning.classList.contains("is-invalid") || weekHours.classList.contains("is-invalid") || stateInput.classList.contains("is-invalid")) {return}
+    if (mainEarning.classList.contains("is-invalid") || weekHours.classList.contains("is-invalid")) {return}
 
     const wageForm = document.querySelector("#earning-frm")
     const inputs = Array.from(wageForm.querySelectorAll('input[type="text"]'))
@@ -238,14 +236,12 @@ document.querySelector("#add-pay").addEventListener("click", () => {
 })
 
 let createInput
-let weekendHours = null
+let weekendHours = null // FIXME: weekendHours is not affected by the change in classes.js
 document.querySelector("#rate-input").addEventListener("change", () => {
     const option = document.querySelector("#rate-input").firstElementChild
 
     // Initialize CreateInput class
     switch (option.value) {
-        case "select":
-            return
         case "everyday":
         case "weekday":
             createInput = new classes.CreateInput(option.value)
