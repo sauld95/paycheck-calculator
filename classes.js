@@ -25,7 +25,6 @@ export class CreateInput {
     constructor(week) {
         this.week = week
         this.name = ''
-        this.classArray = ["form-control", "me-sm-2"]
         this.placeholder = ''
     }
     setName(name) {
@@ -42,7 +41,7 @@ export class CreateInput {
         select.setAttribute("aria-label", "Default select example")
 
         select.innerHTML = `
-        <option value="select" selected>--Select Rate--</option>
+        <option value="select" selected hidden>--Select--</option>
         <option value="everyday">Every Day</option>
         <option value="weekday">Weekday</option>
         <option value="weekend">Weekend</option>
@@ -100,13 +99,13 @@ export class CreateInput {
         const input = document.createElement("input")
         input.setAttribute("type", "text")
         input.setAttribute("name", this.name)
-        input.classList.add(...this.classArray, "rate-group")
+        input.classList.add("form-control", "rate-group")
         input.setAttribute("data-week", this.week)
         input.setAttribute("placeholder", this.placeholder)
 
         // Create div
         const div = document.createElement("div")
-        div.classList.add("input-group")
+        div.classList.add("input-group", "me-sm-2")
 
         div.appendChild(span)
         div.appendChild(input)
@@ -122,12 +121,12 @@ export class CreateInput {
 
         input.setAttribute("type", "text")
         input.setAttribute("name", this.name)
-        input.classList.add(...this.classArray)
+        input.classList.add("form-control", "me-sm-2")
         input.setAttribute("id", this.week)
         input.setAttribute("placeholder", this.placeholder)
 
         const parent = document.querySelector("#earning-frm")
-        const reference = document.querySelector("#calculate")
+        const reference = document.querySelector("#add-pay")
 
         parent.insertBefore(input, reference)
     }
@@ -145,7 +144,7 @@ export class CreateInput {
             
             if (count === 0 && document.querySelector("#weekend-hours") !== null) {
                 document.querySelector("#weekend-hours").remove()
-                weekendHours = null
+                weekendHours = null // FIXME: weekendHours is not defined
             }
         }
     }
@@ -234,7 +233,7 @@ export class Calc {
             case 'weekend':
                 value = hour2
                 break;
-            case 'overtime':
+            case 'Overtime':
                 value = parseFloat((hour1 - 40).toFixed(2))
                 break;
         }

@@ -34,8 +34,8 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
     // If class contains 'is-invalid', return 
     let mainEarning = document.querySelector("#main-earning")
     const weekHours = document.querySelector("#Week-hours")
-    const stateInput = document.querySelector("#state")
-    if (mainEarning.classList.contains("is-invalid") || weekHours.classList.contains("is-invalid") || stateInput.classList.contains("is-invalid")) {return}
+    const state = document.querySelector("#state")
+    if (mainEarning.classList.contains("is-invalid") || weekHours.classList.contains("is-invalid") || state.classList.contains("is-invalid")) {return}
 
     const wageForm = document.querySelector("#earning-frm")
     const inputs = Array.from(wageForm.querySelectorAll('input[type="text"]'))
@@ -93,18 +93,18 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
     if (hour1.hours > 40 && taxInfo.freq === "weekly") {
         let preAmount = classes.Calc.totalAmount(".earning-row-amount")
 
-        classes.UI.deleteEarning('overtime')
+        classes.UI.deleteEarning('Overtime')
 
-        const overtime = new classes.Earning('overtime', 'ot-days')
+        const overtime = new classes.Earning('Overtime', 'ot-days')
         const rate = classes.Calc.overtimeRate(preAmount, hour1.hours)
-        const hours = overtime.setHours(classes.Calc.getHours('overtime', hour1.hours, hour2.hours))
+        const hours = overtime.setHours(classes.Calc.getHours('Overtime', hour1.hours, hour2.hours))
 
         overtime.setRate(rate)
         classes.Calc.getAmount(rate, hours, overtime)
 
         classes.UI.createOvertimeList(overtime)
     } else {
-        classes.UI.deleteEarning('overtime')
+        classes.UI.deleteEarning('Overtime')
     }
 
     /* 
@@ -238,14 +238,12 @@ document.querySelector("#add-pay").addEventListener("click", () => {
 })
 
 let createInput
-let weekendHours = null
+let weekendHours = null // FIXME: weekendHours is not affected by the change in classes.js
 document.querySelector("#rate-input").addEventListener("change", () => {
     const option = document.querySelector("#rate-input").firstElementChild
 
     // Initialize CreateInput class
     switch (option.value) {
-        case "select":
-            return
         case "everyday":
         case "weekday":
             createInput = new classes.CreateInput(option.value)
