@@ -1,8 +1,9 @@
 // FIXME: Change filename to adjust-media-query.js
 
-const mediaQuery = window.matchMedia('(max-width: 767px)')
+export const mediaQuery = window.matchMedia('(max-width: 767px)')
 const earningForm = document.querySelector("#earning-frm")
 const summaryTbl = document.querySelector("#summary-tbl")
+const navSupport = document.querySelector("#navbarSupportedContent")
 
 // Tax Info Form
 const state = document.querySelector("#state")
@@ -17,7 +18,7 @@ function convertMobile() {
     // Navbar
     earningForm.classList.remove("d-flex")
     earningForm.classList.add("container-sm")
-
+    navSupport.classList.add("mx-5")
     // Table
     summaryTbl.classList.add("table-sm", "table-bordered")
 
@@ -39,6 +40,7 @@ function convertDesk() {
     // Navbar
     earningForm.classList.remove("container-sm")
     earningForm.classList.add("d-flex")
+    navSupport.classList.remove("mx-5")
 
     // Table
     summaryTbl.classList.remove("table-sm", "table-bordered")

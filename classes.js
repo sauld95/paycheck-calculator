@@ -233,7 +233,7 @@ export class Calc {
             case 'weekend':
                 value = hour2
                 break;
-            case 'overtime':
+            case 'Overtime':
                 value = parseFloat((hour1 - 40).toFixed(2))
                 break;
         }

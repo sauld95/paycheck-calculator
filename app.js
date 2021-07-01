@@ -27,13 +27,15 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
     Add "is-invalid" class if a state is not selected 
     or if main input (main-earning, main hours) is left empty or no integer is typed
     */
+    validity.Validation("state", "add", "")
     validity.Validation("main-earning", "add", "", /[^0-9.]+/gi)
     validity.Validation("week-hours", "add", "", /[^0-9.]+/gi)
 
     // If class contains 'is-invalid', return 
     let mainEarning = document.querySelector("#main-earning")
     const weekHours = document.querySelector("#Week-hours")
-    if (mainEarning.classList.contains("is-invalid") || weekHours.classList.contains("is-invalid")) {return}
+    const state = document.querySelector("#state")
+    if (mainEarning.classList.contains("is-invalid") || weekHours.classList.contains("is-invalid") || state.classList.contains("is-invalid")) {return}
 
     const wageForm = document.querySelector("#earning-frm")
     const inputs = Array.from(wageForm.querySelectorAll('input[type="text"]'))
@@ -91,18 +93,18 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
     if (hour1.hours > 40 && taxInfo.freq === "weekly") {
         let preAmount = classes.Calc.totalAmount(".earning-row-amount")
 
-        classes.UI.deleteEarning('overtime')
+        classes.UI.deleteEarning('Overtime')
 
-        const overtime = new classes.Earning('overtime', 'ot-days')
+        const overtime = new classes.Earning('Overtime', 'ot-days')
         const rate = classes.Calc.overtimeRate(preAmount, hour1.hours)
-        const hours = overtime.setHours(classes.Calc.getHours('overtime', hour1.hours, hour2.hours))
+        const hours = overtime.setHours(classes.Calc.getHours('Overtime', hour1.hours, hour2.hours))
 
         overtime.setRate(rate)
         classes.Calc.getAmount(rate, hours, overtime)
 
         classes.UI.createOvertimeList(overtime)
     } else {
-        classes.UI.deleteEarning('overtime')
+        classes.UI.deleteEarning('Overtime')
     }
 
     /* 
