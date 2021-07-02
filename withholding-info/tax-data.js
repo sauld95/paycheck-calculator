@@ -1,4 +1,10 @@
+import { CreateInput } from "../classes.js"
+
 export const appData = {
+    class: {
+        weekend_hours: new CreateInput(),
+        create_input: new CreateInput()
+    },
     hours: {
         week_hours: 0,
         weekend_hours: 0,

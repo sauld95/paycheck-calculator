@@ -22,10 +22,13 @@ export class Earning {
 
 // Used for rates and new weekend hour
 export class CreateInput {
-    constructor(week) {
-        this.week = week
+    constructor() {
+        this.week = ''
         this.name = ''
         this.placeholder = ''
+    }
+    setWeek(week) {
+        return this.week = week
     }
     setName(name) {
         return this.name = name
@@ -144,7 +147,7 @@ export class CreateInput {
             
             if (count === 0 && document.querySelector("#weekend-hours") !== null) {
                 document.querySelector("#weekend-hours").remove()
-                weekendHours = null // FIXME: weekendHours is not defined
+                taxData.appData.class.weekend_hours.week = ''
             }
         }
     }

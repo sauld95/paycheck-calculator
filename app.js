@@ -237,26 +237,26 @@ document.querySelector("#add-pay").addEventListener("click", () => {
 
 })
 
-let createInput
-let weekendHours = null // FIXME: weekendHours is not affected by the change in classes.js
 document.querySelector("#rate-input").addEventListener("change", () => {
     const option = document.querySelector("#rate-input").firstElementChild
-
+    let {create_input} = taxData.appData.class
+    
     // Initialize CreateInput class
     switch (option.value) {
         case "everyday":
         case "weekday":
-            createInput = new classes.CreateInput(option.value)
+            create_input.setWeek(option.value)
             break;
         case "weekend":
-            createInput = new classes.CreateInput(option.value)
+            create_input.setWeek(option.value)
+            let {weekend_hours} = taxData.appData.class
             // Check if weekend hours does not exist and create weekend hours
-            if (weekendHours === null) {
-                weekendHours = new classes.CreateInput("weekend-hours")
-                weekendHours.setName("hours")
-                weekendHours.placeholder = "Weekend Hours"
+            if (!weekend_hours.week) {
+                weekend_hours.setWeek("weekend-hours")
+                weekend_hours.setName("hours")
+                weekend_hours.placeholder = "Weekend Hours"
 
-                weekendHours.createWeekendHours()
+                weekend_hours.createWeekendHours()
             }
             break;
     }
@@ -265,6 +265,7 @@ document.querySelector("#rate-input").addEventListener("change", () => {
     option.remove()
     document.querySelector("#rate-input").classList.remove("input-group", "me-2")
     classes.CreateInput.createNameInput()
+    
 })
 
 document.querySelector("#name-input").addEventListener("click", e => {
@@ -281,9 +282,11 @@ document.querySelector("#name-input").addEventListener("click", e => {
     // Prevent named duplicates 
     if (classes.UI.preventDuplicate(letterCase)) {return}
 
+    let {create_input} = taxData.appData.class
+
     // Value entered
-    createInput.setName(letterCase)
-    createInput.setPlaceholder(letterCase)
+    create_input.setName(letterCase)
+    create_input.setPlaceholder(letterCase)
 
     // remove elements within the div #name-input after clicking enter
     const nameInput = document.querySelector("#name-input")
@@ -291,9 +294,9 @@ document.querySelector("#name-input").addEventListener("click", e => {
     nameInput.classList.remove("input-group", "me-2")
 
     // Create the new rate and add it to the table
-    createInput.finalizeNewRate(createInput.week)
+    create_input.finalizeNewRate(create_input.week)
 
-    const earning = new classes.Earning(createInput.name, createInput.week)
+    const earning = new classes.Earning(create_input.name, create_input.week)
     classes.UI.createEarningList(earning)
 
     document.querySelector("#add-pay").disabled = false
