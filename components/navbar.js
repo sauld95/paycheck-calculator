@@ -4,6 +4,8 @@ export const mediaQuery = window.matchMedia('(max-width: 767px)')
 const earningForm = document.querySelector("#earning-frm")
 const summaryTbl = document.querySelector("#summary-tbl")
 const navSupport = document.querySelector("#navbarSupportedContent")
+const addPayBtn = document.querySelector("#add-pay")
+const calcBtn = document.querySelector("#calculate")
 
 // Tax Info Form
 const state = document.querySelector("#state")
@@ -15,53 +17,58 @@ const stateAllow = document.querySelector("#state-allowance")
 const infoArr = [state, status, freq, fedAllow, stateAllow]
 
 function convertMobile() {
-    // Navbar
-    earningForm.classList.remove("d-flex")
-    earningForm.classList.add("container-sm")
-    navSupport.classList.add("mx-5")
-    // Table
-    summaryTbl.classList.add("table-sm", "table-bordered")
+  // Navbar
+  earningForm.classList.remove("d-flex")
+  earningForm.classList.add("container-sm")
+  navSupport.classList.add("mx-5")
+  addPayBtn.classList.add("mt-2")
+  calcBtn.classList.add("mt-2")
 
-    // Tax Info Form
-    state.classList.add("form-select-sm")
-    status.classList.add("form-select-sm")
-    freq.classList.add("form-select-sm")
-    fedAllow.classList.add("form-control-sm")
-    stateAllow.classList.add("form-control-sm")
+  // Table
+  summaryTbl.classList.add("table-sm", "table-bordered")
 
-    infoArr.forEach(info => {
-        info.parentElement.previousElementSibling.classList.remove("col-form-label")
-        info.parentElement.previousElementSibling.classList.add("col-form-label-sm")
-    })
+  // Tax Info Form
+  state.classList.add("form-select-sm")
+  status.classList.add("form-select-sm")
+  freq.classList.add("form-select-sm")
+  fedAllow.classList.add("form-control-sm")
+  stateAllow.classList.add("form-control-sm")
+
+  infoArr.forEach(info => {
+    info.parentElement.previousElementSibling.classList.remove("col-form-label")
+    info.parentElement.previousElementSibling.classList.add("col-form-label-sm")
+  })
 
 }
 
 function convertDesk() {
-    // Navbar
-    earningForm.classList.remove("container-sm")
-    earningForm.classList.add("d-flex")
-    navSupport.classList.remove("mx-5")
+  // Navbar
+  earningForm.classList.remove("container-sm")
+  earningForm.classList.add("d-flex")
+  navSupport.classList.remove("mx-5")
+  addPayBtn.classList.remove("mt-2")
+  calcBtn.classList.remove("mt-2")
 
-    // Table
-    summaryTbl.classList.remove("table-sm", "table-bordered")
+  // Table
+  summaryTbl.classList.remove("table-sm", "table-bordered")
 
-    // Tax Info Form
-    state.classList.remove("form-select-sm")
-    status.classList.remove("form-select-sm")
-    freq.classList.remove("form-select-sm")
-    fedAllow.classList.remove("form-control-sm")
-    stateAllow.classList.remove("form-control-sm")
+  // Tax Info Form
+  state.classList.remove("form-select-sm")
+  status.classList.remove("form-select-sm")
+  freq.classList.remove("form-select-sm")
+  fedAllow.classList.remove("form-control-sm")
+  stateAllow.classList.remove("form-control-sm")
 
-    infoArr.forEach(info => {
-        info.parentElement.previousElementSibling.classList.remove("col-form-label-sm")
-        info.parentElement.previousElementSibling.classList.add("col-form-label")
-    })
+  infoArr.forEach(info => {
+    info.parentElement.previousElementSibling.classList.remove("col-form-label-sm")
+    info.parentElement.previousElementSibling.classList.add("col-form-label")
+  })
     
 }
 
 // Check for smaller screen size to change bootstrap classes right away
 if (mediaQuery.matches) {
-    convertMobile()
+  convertMobile()
 }
 
 // Toggle between bootstrap classes when size changes

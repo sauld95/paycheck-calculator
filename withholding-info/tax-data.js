@@ -26,12 +26,8 @@ export const appData = {
         state_allowance: 0
     },
     withholding: {
-        federalWH: {
-
-        },
-        stateWH: {
-
-        },
+        federalWH: 0,
+        stateWH: 0,
         social: 0,
         medicare: {
             amount: 0,

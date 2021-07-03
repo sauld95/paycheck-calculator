@@ -253,15 +253,14 @@ export class Calc {
         const regex = /[0-9]+.[0-9]{1,2}/
         let amountArr = earningList.map(earn => parseFloat(earn.textContent.match(regex)[0]))
         
-        return parseFloat((amountArr.reduce((total, sum) => {return total + sum})).toFixed(2))
+        return amountArr.reduce((total, sum) => {return total + sum})
     }
     static medicare() {
         // TODO: Medicare: Work on medicare function
     }
     static social(totalWage) {
-        let { social } = taxData.appData.withholding
         const { percent } = withhold.FICA.Social
         
-        return social = totalWage * percent
+        return totalWage * percent
     }
 }

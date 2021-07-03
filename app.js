@@ -57,7 +57,7 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
         hour2 = new classes.Hours(weekendHours.name)
         hour2.setHours(parseFloat(weekendHours.value))
     } catch (err) {
-        // continue running the code after the error
+        // ignore error
     }
 
 
@@ -84,13 +84,13 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
     const {threshold, percent} = withhold.FICA.Medicare
     
 
-    //=============================//
-    // Overtime Section for weekly //
-    //=============================//
+    //=================================//
+    // Overtime Sub-Section for weekly //
+    //=================================//
 
-    // See tax-data.js for adding overtime manually for other pay periods besides weekly
     // Check if hours exceed 40 hours and set or delete overtime
     if (hour1.hours > 40 && taxInfo.freq === "weekly") {
+        debugger;
         let preAmount = classes.Calc.totalAmount(".earning-row-amount")
 
         classes.UI.deleteEarning('Overtime')
@@ -111,18 +111,17 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
     Get final total amount for the earning table
     Set total amount in tax-data.js and the Total in the earning table
     */
-    let finalAmount = classes.Calc.totalAmount(".earning-row-amount")
 
-    taxData.appData.table.earning_total = finalAmount
-    document.querySelector("#earning-tbl-total").nextElementSibling.textContent = `$ ${finalAmount.toFixed(2)}`
+    table.earning_total = classes.Calc.totalAmount(".earning-row-amount")
+    document.querySelector("#earning-tbl-total").nextElementSibling.textContent = `$ ${table.earning_total.toFixed(2)}`
 
-    //===================//
-    // Tax Table Section //
-    //===================//
+    //=======================//
+    // Tax Table Sub-Section //
+    //=======================//
     
     // Update FICA Social Security table
-    let socialAmt = classes.Calc.social(finalAmount)
-    document.querySelector("#fica-social").nextElementSibling.textContent = `$ ${socialAmt.toFixed(2)}`
+    withholding.social = classes.Calc.social(table.earning_total)
+    document.querySelector("#fica-social").nextElementSibling.textContent = `$ ${withholding.social.toFixed(2)}`
 
     // Update FICA Medicare table
     // TODO: Medicare: Move code to Calc.medicare function
@@ -136,37 +135,37 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
     document.querySelector("#fica-medicare").nextElementSibling.textContent = `$ ${withholding.medicare.amount.toFixed(2)}`
 
     // Update State Withholding
-    // Go to tax-data.js for state withhold amount on the event listener 'change' instead of 'submit'
-    document.querySelector("#state-withhold").nextElementSibling.textContent = `$ ${stateIncomeCalc.stateWH(taxInfo.state).toFixed(2)}`
+    withholding.stateWH = stateIncomeCalc.stateWH(taxInfo.state)
+    document.querySelector("#state-withhold").nextElementSibling.textContent = `$ ${withholding.stateWH.toFixed(2)}`
 
     //Update Federal Withholding
-    let federalWH = stateIncomeCalc.fedWH(taxInfo.freq, finalAmount, taxInfo.status)
-    document.querySelector("#fed-withhold").nextElementSibling.textContent = `$ ${federalWH.toFixed(2)}`
+    withholding.federalWH = stateIncomeCalc.fedWH(taxInfo.freq, table.earning_total, taxInfo.status)
+    document.querySelector("#fed-withhold").nextElementSibling.textContent = `$ ${withholding.federalWH.toFixed(2)}`
 
     /* 
     Get final total amount for the tax table
     Set total amount in tax-data.js and the Total in the tax table
     */
-    let finalTaxAmount = classes.Calc.totalAmount(".tax-row-amount")
-
-    taxData.appData.table.tax = finalTaxAmount
-    document.querySelector("#tax-tbl-total").nextElementSibling.textContent = `$ ${finalTaxAmount.toFixed(2)}`
+    table.tax_total = classes.Calc.totalAmount(".tax-row-amount")
+    document.querySelector("#tax-tbl-total").nextElementSibling.textContent = `$ ${table.tax_total.toFixed(2)}`
     
-    //=======================//
-    // Summary Table Section //
-    //=======================//
+    //===========================//
+    // Summary Table Sub-Section //
+    //===========================//
 
     let gross = document.querySelector("#gross")
     let taxable = document.querySelector("#taxable")
     let taxes = document.querySelector("#taxes")
     let net = document.querySelector("#net")
 
-    gross.textContent = `$ ${finalAmount}`
-    taxable.textContent = `$ ${finalAmount}`
-    taxes.textContent = `$ ${finalTaxAmount}`
-    net.textContent = `$ ${(finalAmount - finalTaxAmount).toFixed(2)}`
+    gross.textContent = `$ ${table.earning_total.toFixed(2)}`
+    taxable.textContent = `$ ${table.earning_total.toFixed(2)}`
+    taxes.textContent = `$ ${table.tax_total}`
+    table.net_total = table.earning_total - table.tax_total
+    net.textContent = `$ ${table.net_total.toFixed(2)}`
 
     classes.UI.clearFields()
+    console.log(taxData.appData)
 })
 
 // Remove "is-invalid" class after correct value is typed
@@ -205,17 +204,20 @@ document.querySelector("#tax-info-frm").addEventListener("change", () => {
         Get final total amount for the tax table
         Set total amount in tax-data.js and the Total in the tax table
         */
-        let finalTaxAmount = classes.Calc.totalAmount(".tax-row-amount")
+        table.tax_total = classes.Calc.totalAmount(".tax-row-amount")
 
-        taxData.appData.table.tax = finalTaxAmount
-        document.querySelector("#tax-tbl-total").nextElementSibling.textContent = `$ ${finalTaxAmount.toFixed(2)}`
+        document.querySelector("#tax-tbl-total").nextElementSibling.textContent = `$ ${table.tax_total.toFixed(2)}`
     
         let taxes = document.querySelector("#taxes")
         let net = document.querySelector("#net")
 
-        taxes.textContent = `$ ${finalTaxAmount}`
-        net.textContent = `$ ${(table.earning_total - finalTaxAmount).toFixed(2)}`
+        taxes.textContent = `$ ${table.tax_total}`
+        net.textContent = `$ ${(table.earning_total - table.tax_total).toFixed(2)}`
     }
+
+    //=============================//
+    // Manual Overtime Sub-Section //
+    //=============================//
 
     // Include overtime hours input for pay periods that are not weekly
     if (taxInfo.freq !== "weekly" || taxInfo.freq !== "daily") {
@@ -236,6 +238,10 @@ document.querySelector("#add-pay").addEventListener("click", () => {
     document.querySelector("#calculate").disabled = true
 
 })
+
+//==========//
+// 1st Step //
+//==========//
 
 document.querySelector("#rate-input").addEventListener("change", () => {
     const option = document.querySelector("#rate-input").firstElementChild
@@ -267,6 +273,10 @@ document.querySelector("#rate-input").addEventListener("change", () => {
     classes.CreateInput.createNameInput()
     
 })
+
+//==========//
+// 2nd Step //
+//==========//
 
 document.querySelector("#name-input").addEventListener("click", e => {
     if (e.target.id !== "enter-name") {return}

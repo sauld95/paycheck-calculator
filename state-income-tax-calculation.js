@@ -1,6 +1,25 @@
 import * as taxData from "./withholding-info/tax-data.js"
 import * as withhold from "./withholding-info/tax-withholding-data.js"
 
+export function fedWH(frequency, totalWage, status) {
+    const period = withhold.Federal[frequency]
+    let lessThanWageAmt = 0
+    let taxPercent = 0
+    let tentativeAmt = 0
+
+    period[status][0].forEach((amount, i) => {
+        if (amount > totalWage) {
+            return
+        } else {
+            lessThanWageAmt = amount
+            taxPercent = withhold.Federal.taxBracket[i]
+            tentativeAmt = period[status][1][i]
+        }
+    })
+
+    return ((totalWage - lessThanWageAmt) * taxPercent) + tentativeAmt
+}
+
 class WithholdingCalc {
     static wi(deductionMax, percent, grossEarning, annualEarning) {
         return deductionMax - (percent * (annualEarning - grossEarning))
@@ -82,23 +101,4 @@ export function stateWH(state) {
         default:
             break;
     }
-}
-
-export function fedWH(frequency, totalWage, status) {
-    const period = withhold.Federal[frequency]
-    let lessThanWageAmt = 0
-    let taxPercent = 0
-    let tentativeAmt = 0
-
-    period[status][0].forEach((amount, i) => {
-        if (amount > totalWage) {
-            return
-        } else {
-            lessThanWageAmt = amount
-            taxPercent = withhold.Federal.taxBracket[i]
-            tentativeAmt = period[status][1][i]
-        }
-    })
-
-    return ((totalWage - lessThanWageAmt) * taxPercent) + tentativeAmt
 }
