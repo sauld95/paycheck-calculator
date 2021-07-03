@@ -90,10 +90,9 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
 
     // Check if hours exceed 40 hours and set or delete overtime
     if (hour1.hours > 40 && taxInfo.freq === "weekly") {
-        debugger;
-        let preAmount = classes.Calc.totalAmount(".earning-row-amount")
-
         classes.UI.deleteEarning('Overtime')
+        
+        let preAmount = classes.Calc.totalAmount(".earning-row-amount")
 
         const overtime = new classes.Earning('Overtime', 'ot-days')
         const rate = classes.Calc.overtimeRate(preAmount, hour1.hours)
