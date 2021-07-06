@@ -39,8 +39,9 @@
                     <div class="col-sm-9 col-lg-9 col-xl-9">
                         <select class="form-select" id="state">
                             <option value="" selected hidden>--State--</option>
-                            <option value="IL">IL</option>
-                            <option value="WI">WI</option>
+                            <option value="IL">Illinois</option>
+                            <option value="NY">New York</option>
+                            <option value="WI">Wisconsin</option>
                         </select>
                     </div>
                 </div>
@@ -52,7 +53,7 @@
                             <option value="marriedJ">Married</option>
                             <option value="marriedS">Married Filing Seperate</option>
                             <option value="hoh">Head of Household</option>
-                            <option value="widower">Qualified Widow</option>
+                            <option value="widower" hidden>Qualified Widow</option>
                         </select>
                     </div>
                 </div>
@@ -176,5 +177,6 @@
     </script>
     <script type="module" src="/app.js"></script>
     <script type="module" src="components/navbar.js"></script>
+    <script type="module" src="/withholding-info/states-config.js"></script>
 </body>
 </html>

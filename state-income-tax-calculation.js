@@ -1,8 +1,10 @@
 import * as taxData from "./withholding-info/tax-data.js"
 import * as withhold from "./withholding-info/tax-withholding-data.js"
 
-export function fedWH(frequency, totalWage, status) {
-    const period = withhold.Federal[frequency]
+// Standard calculation used by the federal and various states
+export function standard(frequency, totalWage, status, withholdDataLoc) {
+    const period = withholdDataLoc[frequency]
+    
     let lessThanWageAmt = 0
     let taxPercent = 0
     let tentativeAmt = 0
@@ -12,7 +14,7 @@ export function fedWH(frequency, totalWage, status) {
             return
         } else {
             lessThanWageAmt = amount
-            taxPercent = withhold.Federal.taxBracket[i]
+            taxPercent = withholdDataLoc.taxBracket[i]
             tentativeAmt = period[status][1][i]
         }
     })
@@ -31,8 +33,8 @@ class WithholdingCalc {
 }
 
 export function stateWH(state) {
-    let { status, freq } = taxData.appData.taxInfo
-    const { earning_total } = taxData.appData.table
+    let {status, freq} = taxData.appData.taxInfo
+    const {earning_total} = taxData.appData.table
     const freqNum = withhold.PayPeriod[freq]
     const annualGross = earning_total * freqNum
 
@@ -89,14 +91,15 @@ export function stateWH(state) {
                     computedTax += (newNetArray[i] - newNetArray[i - 1]) * taxRate.tax[taxRate.tax.length - 1 - i]
                 }
             }
-
             return computedTax / freqNum
 
         // Link for the provided methods used to calculate withholding
         // https://www2.illinois.gov/rev/forms/withholding/Documents/currentyear/IL-700-T.pdf
         case "IL":
-            
             return WithholdingCalc.il(earning_total, 0, 0, freqNum)
+        
+        case "NY":
+            return standard(freq, earning_total, status, withhold.States.NY)
     
         default:
             break;

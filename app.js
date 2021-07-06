@@ -138,7 +138,7 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
     document.querySelector("#state-withhold").nextElementSibling.textContent = `$ ${withholding.stateWH.toFixed(2)}`
 
     //Update Federal Withholding
-    withholding.federalWH = stateIncomeCalc.fedWH(taxInfo.freq, table.earning_total, taxInfo.status)
+    withholding.federalWH = stateIncomeCalc.standard(taxInfo.freq, table.earning_total, taxInfo.status, withhold.Federal)
     document.querySelector("#fed-withhold").nextElementSibling.textContent = `$ ${withholding.federalWH.toFixed(2)}`
 
     /* 
@@ -159,7 +159,7 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
 
     gross.textContent = `$ ${table.earning_total.toFixed(2)}`
     taxable.textContent = `$ ${table.earning_total.toFixed(2)}`
-    taxes.textContent = `$ ${table.tax_total}`
+    taxes.textContent = `$ ${table.tax_total.toFixed(2)}`
     table.net_total = table.earning_total - table.tax_total
     net.textContent = `$ ${table.net_total.toFixed(2)}`
 
@@ -197,7 +197,7 @@ document.querySelector("#tax-info-frm").addEventListener("change", () => {
     const regularRate = document.querySelector(".earning-row-title").nextElementSibling.textContent
     if (regularRate != 0) {
         document.querySelector("#state-withhold").nextElementSibling.textContent = `$ ${stateIncomeCalc.stateWH(taxInfo.state).toFixed(2)}`
-        document.querySelector("#fed-withhold").nextElementSibling.textContent = `$ ${stateIncomeCalc.fedWH(taxInfo.freq, table.earning_total, taxInfo.status).toFixed(2)}`
+        document.querySelector("#fed-withhold").nextElementSibling.textContent = `$ ${stateIncomeCalc.standard(taxInfo.freq, table.earning_total, taxInfo.status, withhold.Federal).toFixed(2)}`
     
         /* 
         Get final total amount for the tax table
@@ -210,9 +210,15 @@ document.querySelector("#tax-info-frm").addEventListener("change", () => {
         let taxes = document.querySelector("#taxes")
         let net = document.querySelector("#net")
 
-        taxes.textContent = `$ ${table.tax_total}`
+        taxes.textContent = `$ ${table.tax_total.toFixed(2)}`
         net.textContent = `$ ${(table.earning_total - table.tax_total).toFixed(2)}`
     }
+
+    //=================================//
+    // State Configuration Sub-Section //
+    //=================================//
+
+    
 
     //=============================//
     // Manual Overtime Sub-Section //
