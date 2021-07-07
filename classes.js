@@ -264,3 +264,29 @@ export class Calc {
         return totalWage * percent
     }
 }
+
+// Local Storage
+export class Store {
+    static getStorageItem(itemName) {
+        if(localStorage.getItem(itemName) === null) {
+            itemName = {}
+        } else {
+            itemName = JSON.parse(localStorage.getItem(itemName))
+        }
+
+        return itemName
+    }
+
+    static addStorageItem(itemName, property, value) {
+        let item = Store.getStorageItem(itemName)
+
+        Object.defineProperty(item, property, {
+            value: value,
+            writable: true,
+            enumerable: true,
+            configurable: true
+        })
+
+        localStorage.setItem(itemName, JSON.stringify(item))
+    }
+}

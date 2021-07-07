@@ -49,8 +49,7 @@ export function stateWH(state) {
             switch (status) {
                 case 'single':
                 case 'marriedS':
-                case 'hoh':    
-                case 'widower':
+                case 'hoh':
                     // refer to tax-withholding-data.js => States.WI.deductions
                     if (annualGross < deductions.single[1][0]) {
                         deductionAmt = deductions.single[2][0]
@@ -61,7 +60,8 @@ export function stateWH(state) {
                         deductionAmt = WithholdingCalc.wi(deductions.single[2][0], deductions.single[0], deductions.single[1][0], annualGross)
                     }
                     break;
-                case 'marriedJ':
+                case 'marriedJ':    
+                case 'widower':
                     if (annualGross < deductions.marriedJ[1][0]) {
                         deductionAmt = deductions.marriedJ[2][0]
                     }
