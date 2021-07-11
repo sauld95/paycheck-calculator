@@ -28,13 +28,16 @@ export class CreateInput {
         this.placeholder = ''
     }
     setWeek(week) {
-        return this.week = week
+        this.week = week
+        return this
     }
     setName(name) {
-        return this.name = name
+        this.name = name
+        return this
     }
-    setPlaceholder(placeholder) {
-        return this.placeholder = `${placeholder} rate`
+    setPlaceholder(placeholder, filler = 'rate') {
+        this.placeholder = `${placeholder} ${filler}`
+        return this
     }
     static createOptionsRate() {
         document.querySelector("#rate-input").classList.add("input-group", "me-2")
@@ -141,7 +144,7 @@ export class CreateInput {
             UI.deleteEarning(el.target.nextSibling.name)
 
             // if weekend rate count is equal to 0, delete weekend hours
-            const rateGroup = Array.from(document.querySelectorAll(".rate-group"))
+            const rateGroup = [...document.querySelectorAll(".rate-group")]
 
             const count = rateGroup.filter(rate => rate.dataset.week === "weekend").length
             
@@ -166,7 +169,7 @@ export class Hours {
 
 // UI Functionality
 export class UI {
-   static createEarningList(earning) {
+    static createEarningList(earning) {
        const earningList = document.querySelector("#earning-tbl-list")
        const row = document.createElement("tr")
 
@@ -195,8 +198,8 @@ export class UI {
         earningList.insertBefore(row, firstTitle)
      }
 
-   static deleteEarning(name) {
-        const earningList = Array.from(document.querySelectorAll(".earning-row-title"))
+    static deleteEarning(name) {
+        const earningList = [...document.querySelectorAll(".earning-row-title")]
         earningList.forEach(earn => {
             if (earn.textContent === name) {
                 earn.parentElement.remove()
@@ -205,17 +208,18 @@ export class UI {
     }
     static preventDuplicate(name) {
         let boolean = false
-        const earningList = Array.from(document.querySelectorAll(".earning-row-title"))
-            earningList.forEach(earn => {
-                if (earn.textContent === name) {
-                    boolean = true
-                }
+        const earningList = [...document.querySelectorAll(".earning-row-title")]
+        
+        earningList.forEach(earn => {
+            if (earn.textContent === name) {
+                boolean = true
+            }
         })
         return boolean
     }
     static clearFields() {
         const wageForm = document.querySelector("#earning-frm")
-        const inputs = Array.from(wageForm.querySelectorAll('input[type="text"]'))
+        const inputs = [...wageForm.querySelectorAll('input[type="text"]')]
         inputs.forEach(input => input.value = "")
     }
 }
@@ -249,7 +253,7 @@ export class Calc {
         return object.setAmount((rate * hours))
     }
     static totalAmount(classSelector) {
-        const earningList = Array.from(document.querySelectorAll(classSelector))
+        const earningList = [...document.querySelectorAll(classSelector)]
         const regex = /[0-9]+.[0-9]{1,2}/
         let amountArr = earningList.map(earn => parseFloat(earn.textContent.match(regex)[0]))
         
@@ -286,6 +290,14 @@ export class Store {
             enumerable: true,
             configurable: true
         })
+        
+        localStorage.setItem(itemName, JSON.stringify(item))
+    }
+
+    static deleteItem(itemName, property) {
+        let item = Store.getStorageItem(itemName)
+
+        delete item[property]
 
         localStorage.setItem(itemName, JSON.stringify(item))
     }

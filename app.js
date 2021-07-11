@@ -1,7 +1,7 @@
-import * as validity from "./components/validity.js"
-import * as taxData from "./withholding-info/tax-data.js"
+import { Validation } from "./components/validity.js"
+import { appData } from "./withholding-info/tax-data.js"
 import * as withhold from "./withholding-info/tax-withholding-data.js"
-import * as stateIncomeCalc from "./state-income-tax-calculation.js"
+import { stateWH, standard } from "./state-income-tax-calculation.js"
 import * as classes from "./classes.js"
 
 // On load, create initial row for Earning Table
@@ -27,19 +27,23 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
     Add "is-invalid" class if a state is not selected 
     or if main input (main-earning, main hours) is left empty or no integer is typed
     */
-    validity.Validation("state", "add", "")
-    validity.Validation("main-earning", "add", "", /[^0-9.]+/gi)
-    validity.Validation("week-hours", "add", "", /[^0-9.]+/gi)
+    Validation("state", "add", "")
+    Validation("main-earning", "add", "", /[^0-9.]+/gi)
+    Validation("week-hours", "add", "", /[^0-9.]+/gi)
 
     // If class contains 'is-invalid', return 
     let mainEarning = document.querySelector("#main-earning")
     const weekHours = document.querySelector("#Week-hours")
     const state = document.querySelector("#state")
-    if (mainEarning.classList.contains("is-invalid") || weekHours.classList.contains("is-invalid") || state.classList.contains("is-invalid")) {return}
+    if (
+        mainEarning.classList.contains("is-invalid") 
+        || weekHours.classList.contains("is-invalid") 
+        || state.classList.contains("is-invalid")
+    ) {return}
 
     const wageForm = document.querySelector("#earning-frm")
-    const inputs = Array.from(wageForm.querySelectorAll('input[type="text"]'))
-
+    const inputs = [...wageForm.querySelectorAll('input[type="text"]')]
+    
     inputs.forEach(input => {
         // Set values to zero if value is empty or value is not numerical
         (!input.value || /[^0-9.]+/gi.test(input.value)) && (input.value = 0)
@@ -62,7 +66,7 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
 
 
     // Update values for the Earnings Table
-    const rateGroup = Array.from(document.querySelectorAll(".rate-group"))
+    const rateGroup = [...document.querySelectorAll(".rate-group")]
 
     rateGroup.forEach(pay => {
         const name = pay.name
@@ -80,7 +84,7 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
         classes.UI.createEarningList(earning)
     })
 
-    const {table, taxInfo, withholding} = taxData.appData
+    const {table, taxInfo, withholding} = appData
     const {threshold, percent} = withhold.FICA.Medicare
     
 
@@ -134,11 +138,16 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
     document.querySelector("#fica-medicare").nextElementSibling.textContent = `$ ${withholding.medicare.amount.toFixed(2)}`
 
     // Update State Withholding
-    withholding.stateWH = stateIncomeCalc.stateWH(taxInfo.state)
+    withholding.stateWH = stateWH(taxInfo.state)
     document.querySelector("#state-withhold").nextElementSibling.textContent = `$ ${withholding.stateWH.toFixed(2)}`
 
     //Update Federal Withholding
-    withholding.federalWH = stateIncomeCalc.standard(taxInfo.freq, table.earning_total, taxInfo.status, withhold.Federal)
+    withholding.federalWH = standard({
+        frequency: taxInfo.freq, 
+        totalWage: table.earning_total, 
+        status: taxInfo.status, 
+        dataLocation: withhold.Federal
+    })
     document.querySelector("#fed-withhold").nextElementSibling.textContent = `$ ${withholding.federalWH.toFixed(2)}`
 
     /* 
@@ -164,13 +173,12 @@ document.querySelector("#earning-frm").addEventListener("submit", e => {
     net.textContent = `$ ${table.net_total.toFixed(2)}`
 
     classes.UI.clearFields()
-    console.log(taxData.appData)
 })
 
 // Remove "is-invalid" class after correct value is typed
 document.querySelector("#earning-frm").addEventListener("input", () => {
-    validity.Validation("main-earning", "remove", /^[0-9]+\.?[0-9]?[0-9]?/g)
-    validity.Validation("week-hours", "remove", /^[0-9]+\.?[0-9]?[0-9]?/g)
+    Validation("main-earning", "remove", /^[0-9]+\.?[0-9]?[0-9]?/g)
+    Validation("week-hours", "remove", /^[0-9]+\.?[0-9]?[0-9]?/g)
 })
 
 //==========================================//
@@ -178,26 +186,32 @@ document.querySelector("#earning-frm").addEventListener("input", () => {
 //==========================================//
 
 document.querySelector("#tax-info-frm").addEventListener("change", () => {
-    const getOptionsValue = (elementID) => {
+    const getValue = (elementID) => {
         return document.getElementById(elementID).value
     }
 
-    validity.Validation("state", "remove", /\S/)
-    const {taxInfo, table} = taxData.appData
+    Validation("state", "remove", /\S/)
+    const {taxInfo, table} = appData
 
-    taxInfo.state = getOptionsValue('state');
-    taxInfo.status = getOptionsValue('status');
-    taxInfo.freq = getOptionsValue('frequency')
-    taxInfo.fed_allowance = parseInt(getOptionsValue('fed-allowance'))
-    taxInfo.state_allowance = parseInt(getOptionsValue('state-allowance'))
+    taxInfo.state = getValue('state');
+    taxInfo.status = getValue('status');
+    taxInfo.freq = getValue('frequency')
+    taxInfo.fed_allowance = parseInt(getValue('fed-allowance'))
+    taxInfo.state_allowance = parseInt(getValue('state-allowance'))
 
     // Taxes table: Change state withholding name and amount
     document.querySelector("#state-withhold-select").textContent = taxInfo.state
 
     const regularRate = document.querySelector(".earning-row-title").nextElementSibling.textContent
     if (regularRate != 0) {
-        document.querySelector("#state-withhold").nextElementSibling.textContent = `$ ${stateIncomeCalc.stateWH(taxInfo.state).toFixed(2)}`
-        document.querySelector("#fed-withhold").nextElementSibling.textContent = `$ ${stateIncomeCalc.standard(taxInfo.freq, table.earning_total, taxInfo.status, withhold.Federal).toFixed(2)}`
+        let totalFedWH = standard({
+            frequency: taxInfo.freq, 
+            totalWage: table.earning_total, 
+            status: taxInfo.status, 
+            dataLocation: withhold.Federal
+        })
+        document.querySelector("#state-withhold").nextElementSibling.textContent = `$ ${stateWH(taxInfo.state).toFixed(2)}`
+        document.querySelector("#fed-withhold").nextElementSibling.textContent = `$ ${totalFedWH.toFixed(2)}`
     
         /* 
         Get final total amount for the tax table
@@ -225,9 +239,11 @@ document.querySelector("#tax-info-frm").addEventListener("change", () => {
     //=============================//
 
     // Include overtime hours input for pay periods that are not weekly
-    if (taxInfo.freq !== "weekly" || taxInfo.freq !== "daily") {
+    if (
+        taxInfo.freq !== "weekly" 
+        || taxInfo.freq !== "daily"
+    ) {
         // TODO: Set a manual overtime input for other pay paeriods besids weekly
-        // TODO: first move all class from app.js to it's own file for easier access
     }
 })
 
@@ -250,7 +266,7 @@ document.querySelector("#add-pay").addEventListener("click", () => {
 
 document.querySelector("#rate-input").addEventListener("change", () => {
     const option = document.querySelector("#rate-input").firstElementChild
-    let {create_input} = taxData.appData.class
+    let {create_input} = appData.class
     
     // Initialize CreateInput class
     switch (option.value) {
@@ -260,14 +276,13 @@ document.querySelector("#rate-input").addEventListener("change", () => {
             break;
         case "weekend":
             create_input.setWeek(option.value)
-            let {weekend_hours} = taxData.appData.class
+            let {weekend_hours} = appData.class
             // Check if weekend hours does not exist and create weekend hours
             if (!weekend_hours.week) {
                 weekend_hours.setWeek("weekend-hours")
-                weekend_hours.setName("hours")
-                weekend_hours.placeholder = "Weekend Hours"
-
-                weekend_hours.createWeekendHours()
+                    .setName("hours")
+                    .setPlaceholder("Weekend Hours", "")
+                    .createWeekendHours()
             }
             break;
     }
@@ -288,8 +303,8 @@ document.querySelector("#name-input").addEventListener("click", e => {
 
     // Check for entered value. Return if value is invalid
     const newName = document.querySelector("#new-name")
-    newName.addEventListener("input", () => validity.Validation("new-name", "remove", /\w/))
-    validity.Validation("new-name", "add", "")
+    newName.addEventListener("input", () => Validation("new-name", "remove", /\w/))
+    Validation("new-name", "add", "")
     if (!newName.value) {return}
 
     let letterCase = newName.value.charAt(0).toUpperCase() + newName.value.slice(1).toLowerCase();
@@ -297,11 +312,11 @@ document.querySelector("#name-input").addEventListener("click", e => {
     // Prevent named duplicates 
     if (classes.UI.preventDuplicate(letterCase)) {return}
 
-    let {create_input} = taxData.appData.class
+    let {create_input} = appData.class
 
     // Value entered
     create_input.setName(letterCase)
-    create_input.setPlaceholder(letterCase)
+        .setPlaceholder(letterCase)
 
     // remove elements within the div #name-input after clicking enter
     const nameInput = document.querySelector("#name-input")

@@ -1,9 +1,9 @@
-import * as taxData from "./withholding-info/tax-data.js"
-import * as withhold from "./withholding-info/tax-withholding-data.js"
+import { appData } from "./withholding-info/tax-data.js"
+import { States, PayPeriod } from "./withholding-info/tax-withholding-data.js"
 
 // Standard calculation used by the federal and various states
-export function standard(frequency, totalWage, status, withholdDataLoc) {
-    const period = withholdDataLoc[frequency]
+export const standard = function standardFormulabyFederal({frequency, totalWage, status, dataLocation}) {
+    const period = dataLocation[frequency]
     
     let lessThanWageAmt = 0
     let taxPercent = 0
@@ -14,7 +14,7 @@ export function standard(frequency, totalWage, status, withholdDataLoc) {
             return
         } else {
             lessThanWageAmt = amount
-            taxPercent = withholdDataLoc.taxBracket[i]
+            taxPercent = dataLocation.taxBracket[i]
             tentativeAmt = period[status][1][i]
         }
     })
@@ -27,23 +27,25 @@ class WithholdingCalc {
         return deductionMax - (percent * (annualEarning - grossEarning))
     }
     static il(totalWage, allowance1, allowance2, payPeriod) {
-        const {IL} = withhold.States
+        const {IL} = States
         return IL.taxRate * (totalWage - (((allowance1 * IL.allowanceLine1) + (allowance2 * IL.allowanceLine2)) / payPeriod))
     }
 }
 
 export function stateWH(state) {
-    let {status, freq} = taxData.appData.taxInfo
-    const {earning_total} = taxData.appData.table
-    const freqNum = withhold.PayPeriod[freq]
+    let {status, freq} = appData.taxInfo
+    const {earning_total} = appData.table
+    const freqNum = PayPeriod[freq]
     const annualGross = earning_total * freqNum
 
     switch (state) {
         // Link for the provided methods used to calculate withholding
         // https://www.revenue.wi.gov/DOR%20Publications/pb166.pdf
         case "WI":
-            const { taxRate, deductions } = withhold.States.WI
+            const { taxRate, deductions } = States.WI
             let deductionAmt
+            const [sPercent, sGross, sDeduction] = deductions.single
+            const [mPercent, mGross, mDeduction] = deductions.marriedJ
 
             // Get deduction Amount 
             switch (status) {
@@ -51,24 +53,24 @@ export function stateWH(state) {
                 case 'marriedS':
                 case 'hoh':
                     // refer to tax-withholding-data.js => States.WI.deductions
-                    if (annualGross < deductions.single[1][0]) {
-                        deductionAmt = deductions.single[2][0]
+                    if (annualGross < sGross[0]) {
+                        deductionAmt = sDeduction[0]
                     }
-                    if (annualGross > deductions.single[1][1]) {
-                        deductionAmt = deductions.single[2][1]
+                    if (annualGross > sGross[1]) {
+                        deductionAmt = sDeduction[1]
                     } else {
-                        deductionAmt = WithholdingCalc.wi(deductions.single[2][0], deductions.single[0], deductions.single[1][0], annualGross)
+                        deductionAmt = WithholdingCalc.wi(sDeduction[0], sPercent, sGross[0], annualGross)
                     }
                     break;
                 case 'marriedJ':    
                 case 'widower':
-                    if (annualGross < deductions.marriedJ[1][0]) {
-                        deductionAmt = deductions.marriedJ[2][0]
+                    if (annualGross < mGross[0]) {
+                        deductionAmt = mDeduction[0]
                     }
-                    if (annualGross > deductions.marriedJ[1][1]) {
-                        deductionAmt = deductions.marriedJ[2][1]
+                    if (annualGross > mGross[1]) {
+                        deductionAmt = mDeduction[1]
                     } else {
-                        deductionAmt = WithholdingCalc.wi(deductions.marriedJ[2][0], deductions.marriedJ[0], deductions.marriedJ[1][0], annualGross)
+                        deductionAmt = WithholdingCalc.wi(mDeduction[0], mPercent, mGross[0], annualGross)
                     }
                     break;
             }
@@ -99,7 +101,12 @@ export function stateWH(state) {
             return WithholdingCalc.il(earning_total, 0, 0, freqNum)
         
         case "NY":
-            return standard(freq, earning_total, status, withhold.States.NY)
+            return standard({
+                frequency: freq, 
+                totalWage: earning_total, 
+                status: status, 
+                dataLocation: States.NY
+            })
     
         default:
             break;
