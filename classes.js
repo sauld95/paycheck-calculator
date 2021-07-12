@@ -157,6 +157,52 @@ export class CreateInput {
 
 }
 
+export class LocalDisplay {
+    static select(lists) {
+        const select = document.createElement("select")
+        select.classList.add("form-select")
+        select.setAttribute("id", "local")
+
+        lists.forEach(list => {
+            const option = document.createElement("option")
+            option.setAttribute("value", list)
+            const text = document.createTextNode(list)
+            option.appendChild(text)
+
+            select.appendChild(option)
+        })
+
+        return select
+    }
+    static container(lists) {
+        const label = document.createElement("label")
+        label.setAttribute("for", "local")
+        label.classList.add("col-form-label", "col-sm-3", "col-lg-3", "col-xl-3")
+
+        const text = document.createTextNode("Local")
+        label.appendChild(text)
+
+        const div = document.createElement("div")
+        div.classList.add("col-sm-9", "col-lg-9", "col-xl-9")
+        div.appendChild(LocalDisplay.select(lists))
+
+        const container = document.createElement("div")
+        container.classList.add("row", "mb-1")
+        container.setAttribute("id", "local-container")
+
+        container.appendChild(label)
+        container.appendChild(div)
+
+        const parent = document.querySelector("#tax-info-frm")
+        const reference = document.querySelector("#status-container")
+
+        parent.insertBefore(container, reference)
+    }
+    static deleteContainer() {
+        document.querySelector("#local-container").remove()
+    }
+}
+
 export class Hours {
     constructor (name) {
         this.name = name
